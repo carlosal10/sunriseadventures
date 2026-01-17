@@ -27,3 +27,26 @@ export async function createTour(data: {
   await connectDB()
   return TourModel.create(data)
 }
+export async function updateTourBySlug(
+  slug: string,
+  data: Partial<{
+    title: string
+    short: string
+    description: string
+    price: number
+    durationDays: number
+    published: boolean
+  }>
+) {
+  await connectDB()
+  return TourModel.findOneAndUpdate(
+    { slug },
+    { $set: data },
+    { new: true }
+  ).lean()
+}
+
+export async function deleteTourBySlug(slug: string) {
+  await connectDB()
+  return TourModel.findOneAndDelete({ slug })
+}

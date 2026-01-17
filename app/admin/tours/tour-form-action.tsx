@@ -30,7 +30,12 @@ export default function TourFormAction({ mode, initial }: Props) {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type, checked } = e.target;
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const name = target.name;
+    const value = target.value;
+    const type = (target as HTMLInputElement).type ?? 'text';
+    const checked = (target as HTMLInputElement).checked;
+
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
