@@ -6,7 +6,7 @@ async function seed() {
 
   await TourModel.deleteMany()
 
-  await TourModel.insertMany([
+  await (TourModel as any).insertMany([
     {
       slug: 'island-getaway',
       title: 'Island Getaway',

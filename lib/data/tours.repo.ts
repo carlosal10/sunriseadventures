@@ -3,12 +3,12 @@ import { TourModel } from '../db/models/Tour'
 
 export async function listTours() {
   await connectDB()
-  return TourModel.find({ published: true }).lean()
+  return TourModel.find({ published: true } as any).lean()
 }
 
 export async function getTour(slug: string) {
   await connectDB()
-  return TourModel.findOne({ slug, published: true }).lean()
+  return TourModel.findOne({ slug, published: true } as any).lean()
 }
 
 export async function listAllToursAdmin() {
@@ -39,8 +39,8 @@ export async function updateTourBySlug(
   }>
 ) {
   await connectDB()
-  return TourModel.findOneAndUpdate(
-    { slug },
+  return (TourModel as any).findOneAndUpdate(
+    { slug } as any,
     { $set: data },
     { new: true }
   ).lean()
@@ -48,5 +48,5 @@ export async function updateTourBySlug(
 
 export async function deleteTourBySlug(slug: string) {
   await connectDB()
-  return TourModel.findOneAndDelete({ slug })
+  return TourModel.findOneAndDelete({ slug } as any)
 }
