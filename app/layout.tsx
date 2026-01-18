@@ -131,7 +131,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <h4 className="text-white font-semibold mb-4">Contact Us</h4>
                 <ul className="space-y-2 text-sm text-gray-400">
                   <li>📍 Nairobi, Kenya</li>
-                  <li>📞 +254 7XX XXX XXX</li>
+                  <li>📞 +254 721 533032</li>
                   <li>✉️ info@sunrisetours.co.ke</li>
                   <li>✉️ sunrisetourke@gmail.com</li>
                   <li>bookingsunrisetours@gmail.com</li>

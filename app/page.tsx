@@ -21,6 +21,11 @@ const slides = [
     headline: 'Adventure Awaits',
     text: 'Breathtaking landscapes, guided treks and unforgettable memories.',
   },
+  {
+    src: '/images/hero-mini.jpg',
+    headline: 'Adventure Awaits',
+    text: 'Breathtaking landscapes, guided treks and unforgettable memories.',
+  },
 ];
 
 /* ---------------- HERO COMPONENT ---------------- */
