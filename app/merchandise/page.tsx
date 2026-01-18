@@ -36,7 +36,7 @@ const products = [
   {
     id: 'sunrise-cap',
     name: 'Sunrise Travel Cap',
-    price: 'KES 1,200',
+    price: 'KES 400',
     image: '/images/merch-cap.jpg',
     category: 'Accessories',
     inStock: true,
@@ -44,7 +44,7 @@ const products = [
   {
     id: 'sunrise-tshirt',
     name: 'Sunrise Branded T-Shirt',
-    price: 'KES 1,800',
+    price: 'KES 650',
     image: '/images/merch-tshirt.jpg',
     category: 'Apparel',
     inStock: false,
