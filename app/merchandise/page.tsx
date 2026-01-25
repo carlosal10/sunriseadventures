@@ -47,7 +47,7 @@ const products = [
     price: 'KES 650',
     image: '/images/merch-tshirt.jpg',
     category: 'Apparel',
-    inStock: false,
+    inStock: true,
   },
   {
     id: 'sunrise-water-bottle',
@@ -99,9 +99,7 @@ export default function MerchandisePage() {
             <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
               {heroSlides[activeSlide].title}
             </h1>
-            <p className="text-lg text-gray-200 mb-6">
-              {heroSlides[activeSlide].subtitle}
-            </p>
+            <p className="text-lg text-gray-200 mb-6">{heroSlides[activeSlide].subtitle}</p>
 
             <Link
               href="#shop"
@@ -155,12 +153,7 @@ export default function MerchandisePage() {
               )}
 
               <div className="relative h-56">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={product.image} alt={product.name} fill className="object-cover" />
               </div>
 
               <div className="p-4 space-y-2">
@@ -168,9 +161,7 @@ export default function MerchandisePage() {
                 <p className="text-sm text-gray-500">{product.category}</p>
 
                 <div className="flex justify-between items-center pt-2">
-                  <span className="font-bold text-orange-600">
-                    {product.price}
-                  </span>
+                  <span className="font-bold text-orange-600">{product.price}</span>
 
                   {product.inStock ? (
                     <Link
@@ -191,12 +182,10 @@ export default function MerchandisePage() {
 
       {/* ================= CTA ================= */}
       <section className="bg-gray-100 rounded-2xl p-10 text-center">
-        <h2 className="text-3xl font-bold mb-4">
-          Bulk Orders & Custom Merchandise
-        </h2>
+        <h2 className="text-3xl font-bold mb-4">Bulk Orders & Custom Merchandise</h2>
         <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-          Ideal for hiking groups, corporate retreats, and adventure events.
-          Custom branding available.
+          Ideal for hiking groups, corporate retreats, and adventure events. Custom branding
+          available.
         </p>
         <Link
           href="/contact"
