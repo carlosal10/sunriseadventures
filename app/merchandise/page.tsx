@@ -52,7 +52,7 @@ const products = [
   {
     id: 'sunrise-water-bottle',
     name: 'Sunrise Water Bottle',
-    price: 'KES 1,500',
+    price: 'KES 1000',
     image: '/images/merch-bottle.jpg',
     category: 'Gear',
     inStock: true,
