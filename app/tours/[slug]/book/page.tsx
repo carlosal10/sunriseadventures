@@ -35,7 +35,7 @@ export default function BookTourPage() {
 ${form.message}
     `;
 
-    const whatsappURL = `https://wa.me/254721533032?text=${encodeURIComponent(text)}`;
+    const whatsappURL = `https://wa.me/message/KVIYDDCYDF7AJ1?text=${encodeURIComponent(text)}`;
     window.open(whatsappURL, '_blank');
   };
 
@@ -104,7 +104,7 @@ ${form.message}
           onClick={handleSubmit}
           className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-lg font-semibold"
         >
-          Submit Booking via WhatsApp
+          Submit Booking
         </button>
 
         <Link href={`/tours/${slug}`} className="block text-center text-sm text-gray-500">
