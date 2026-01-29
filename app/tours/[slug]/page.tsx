@@ -228,10 +228,9 @@ export default function TourDetails({ params }: { params: { slug: string } }) {
             <span>Price</span>
             <span className="font-bold text-orange-600">{tour.price}</span>
           </p>
-
           <Link
-            href="/contact"
-            className="block bg-orange-600 text-white py-3 rounded-lg text-center font-semibold"
+            href={`/tours/${params.slug}/book`}
+            className="block text-center bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-semibold"
           >
             Book This Tour
           </Link>

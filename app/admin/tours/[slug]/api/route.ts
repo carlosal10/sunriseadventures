@@ -1,13 +1,22 @@
-import { NextResponse } from "next/server"
-import { updateTourBySlug, deleteTourBySlug } from "../../../../../lib/data/tours.repo"
+import { NextResponse } from 'next/server';
+import { connectDB } from '../../../../../lib/db/mongoose';
+import Tour from '../../../../../lib/db/models/Tour';
 
 export async function PUT(req: Request, { params }: { params: { slug: string } }) {
-  const body = await req.json()
-  const updated = await updateTourBySlug(params.slug, body)
-  return NextResponse.json({ success: !!updated })
+  await connectDB();
+  const data = await req.json();
+
+  const tour = await Tour.findOneAndUpdate(
+    { slug: params.slug as string },
+    data,
+    { new: true, upsert: false }
+  );
+
+  return NextResponse.json(tour);
 }
 
-export async function DELETE(req: Request, { params }: { params: { slug: string } }) {
-  await deleteTourBySlug(params.slug)
-  return NextResponse.json({ success: true })
+export async function DELETE(_: Request, { params }: { params: { slug: string } }) {
+  await connectDB();
+  await Tour.findOneAndDelete({ slug: params.slug as string });
+  return NextResponse.json({ success: true });
 }

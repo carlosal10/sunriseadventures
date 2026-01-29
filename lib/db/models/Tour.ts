@@ -1,16 +1,39 @@
-import { Schema, model, models } from 'mongoose'
+import mongoose, { Schema, models, model, InferSchemaType } from 'mongoose';
 
 const TourSchema = new Schema(
   {
-    slug: { type: String, required: true, unique: true, index: true },
     title: { type: String, required: true },
-    short: { type: String, required: true },
+    slug: { type: String, required: true, unique: true },
     description: { type: String, required: true },
+    location: { type: String, required: true },
     price: { type: Number, required: true },
-    durationDays: { type: Number, required: true },
-    published: { type: Boolean, default: false },
+
+    startDate: Date,
+    endDate: Date,
+
+    images: [{ type: String }],
+    videoUrl: String,
+
+    highlights: [String],
+    includes: [String],
+    excludes: [String],
+
+    isFeatured: { type: Boolean, default: false },
+    isPublished: { type: Boolean, default: true },
+
+    maxSlots: Number,
+    availableSlots: Number,
+
+    mapLocation: {
+      lat: Number,
+      lng: Number,
+    },
   },
   { timestamps: true }
-)
+);
 
-export const TourModel = models.Tour || model('Tour', TourSchema)
+export type TourDocument = InferSchemaType<typeof TourSchema>;
+
+export const Tour = models.Tour || model<TourDocument>('Tour', TourSchema);
+
+export default Tour;
