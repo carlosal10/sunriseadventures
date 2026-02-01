@@ -1,25 +1,38 @@
-import { connectDB } from '../lib/db/mongoose'
-import { TourModel } from '../lib/db/models/Tour'
+import { connectDB } from '../lib/db/mongoose';
+import Tour from '../lib/db/models/Tour';
 
 async function seed() {
-  await connectDB()
+  await connectDB();
 
-  await TourModel.deleteMany()
+  await Tour.deleteMany({});
 
-  await (TourModel as any).insertMany([
+  await Tour.insertMany([
     {
-      slug: 'island-getaway',
-      title: 'Island Getaway',
-      short: 'Relax at a beachfront resort',
-      description: '5-day island escape with snorkeling',
-      price: 899,
-      durationDays: 5,
-      published: true,
+      title: 'Tigoni Experience',
+      slug: 'tigoni-experience',
+      description: 'A refreshing countryside escape in Tigoni.',
+      location: 'Tigoni, Kenya',
+      price: 2800,
+      isPublished: true,
+      isFeatured: true,
+      images: ['/images/tour-island.jpg'],
     },
-  ])
+    {
+      title: 'Nyamindi Hike',
+      slug: 'nyamindi-hike',
+      description: 'A guided hike to Nyamindi Falls.',
+      location: 'Kathandeni Forest',
+      price: 2850,
+      isPublished: true,
+      images: ['/images/tour-safari.jpg'],
+    },
+  ]);
 
-  console.log('Seed complete')
-  process.exit(0)
+  console.log('✅ Database seeded successfully');
+  process.exit(0);
 }
 
-seed()
+seed().catch((err) => {
+  console.error('❌ Seed failed', err);
+  process.exit(1);
+});
