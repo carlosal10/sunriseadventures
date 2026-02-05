@@ -155,7 +155,6 @@ and breathtaking scenery — perfect for friends, couples, and solo explorers.`,
     description: `Experience the thrill of the World Rally Championship (WRC) Safari Rally Kenya with Sunrise Tours & Adventure in Naivasha.`,
     highlights: [
       'Transport to and from Nairobi to Naivasha',
-      'Accommodation in Naivasha',
       'WRC Safari Rally access',
       'Guided tour of rally stages',
       'Professional photography',
