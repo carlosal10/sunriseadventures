@@ -97,42 +97,6 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             {
-              title: 'Tigoni Experience',
-              desc: 'Escape the city and immerse yourself in a refreshing countryside experience with our Tigoni Farm Adventure. This one-day trip blends nature, relaxation, light adventure, and scenic landscapes—perfect for individuals, friends, and groups looking to unwind and explore.',
-              date: '24th Jan 2026',
-              price: 'From KES2800',
-              image: '/images/tour-island.jpg',
-              slug: 'tigoni-experience',
-            },
-            {
-              title: 'Vallentines Edition-Sironka Resort',
-              desc: `Celebrate love, friendship, and adventure this Valentine’s Day with an unforgettable experience at Sironka Valley Resort. Surrounded by breathtaking landscapes and fun-filled activities, this special Valentine Edition is perfect for couples, friends, and anyone looking to enjoy a unique outdoor getaway.
-Whether you’re celebrating love, self-love, or good vibes with friends, this trip promises adventure, bonding, and lasting memories.`,
-              date: '14th Feb 2026',
-
-              price: 'From KES3800',
-              image: '/images/tour-mountain.jpg',
-              slug: 'vallentines-sironka-resort',
-            },
-            {
-              title: 'Nyamindi Hike',
-              desc: 'Join us for an exciting nature escape to Nyamindi Falls, hidden deep within the lush Kathandeni Forest. This guided hike is perfect for nature lovers, hikers, and adventure seekers looking to explore scenic forest trails and a beautiful waterfall in a peaceful, natural setting.',
-              location: 'Kathandeni Forest – Nyamindi Falls',
-              date: '28th Feb 2026',
-              price: 'From KES2,850',
-              image: '/images/tour-safari.jpg',
-              slug: 'nyamindi-hike',
-            },
-            {
-              title: 'Satima Hike',
-              desc: 'Challenge yourself with an unforgettable hiking experience to Satima Peak, the highest point in the Aberdare Ranges and one of Kenya’s most scenic alpine destinations. This hike is perfect for adventure seekers looking to push their limits while enjoying breathtaking landscapes, open moorlands, and panoramic mountain views.',
-              location: 'Aberdare Ranges – Satima Peak',
-              date: '7th March 2026',
-              price: 'From KES3,800',
-              image: '/images/satima.jpg',
-              slug: 'satima-hike',
-            },
-            {
               title: 'Safari Rally Edition',
               desc: `Experience the thrill of the World Rally Championship (WRC) Safari Rally Kenya with Sunrise Tours & Adventure in Naivasha. This special WRC Edition is designed for motorsport lovers and adventure seekers who want front-row access to one of the world’s most iconic rally events, set against the stunning landscapes of Naivasha.
 From roaring engines and dust-filled stages to scenic views and vibrant fan zones, this is the ultimate rally adventure.`,

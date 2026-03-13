@@ -8,23 +8,14 @@ async function seed() {
 
   await Tour.insertMany([
     {
-      title: 'Tigoni Experience',
-      slug: 'tigoni-experience',
-      description: 'A refreshing countryside escape in Tigoni.',
-      location: 'Tigoni, Kenya',
-      price: 2800,
+      title: 'Safari Rally Edition',
+      slug: 'safari-rally-edition',
+      description: 'Experience the thrill of the World Rally Championship (WRC) Safari Rally Kenya with Sunrise Tours & Adventure in Naivasha.',
+      location: 'Naivasha, Kenya',
+      price: 3500,
       isPublished: true,
       isFeatured: true,
-      images: ['/images/tour-island.jpg'],
-    },
-    {
-      title: 'Nyamindi Hike',
-      slug: 'nyamindi-hike',
-      description: 'A guided hike to Nyamindi Falls.',
-      location: 'Kathandeni Forest',
-      price: 2850,
-      isPublished: true,
-      images: ['/images/tour-safari.jpg'],
+      images: ['/images/safari-rally/1.jpg'],
     },
   ]);
 
