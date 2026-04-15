@@ -97,14 +97,15 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             {
-              title: 'Safari Rally Edition',
-              desc: `Experience the thrill of the World Rally Championship (WRC) Safari Rally Kenya with Sunrise Tours & Adventure in Naivasha. This special WRC Edition is designed for motorsport lovers and adventure seekers who want front-row access to one of the world’s most iconic rally events, set against the stunning landscapes of Naivasha.
-From roaring engines and dust-filled stages to scenic views and vibrant fan zones, this is the ultimate rally adventure.`,
-              location: 'Naivasha – WRC Safari Rally',
-              date: '14th - 15th March 2026',
-              price: 'From KES3,500',
+              title: 'Lalanasi Lodge Trip',
+              desc: `Escape the busy city life and immerse yourself in the cool, green landscapes of Tigoni.
+This one-day farm and countryside experience blends nature walks, relaxation, light adventure,
+and breathtaking scenery — perfect for friends, couples, and solo explorers.`,
+              location: 'Lalanasi & Thompsons',
+              date: '4th May 2026',
+              price: 'From KES4,000',
               image: '/images/rally.jpg',
-              slug: 'safari-rally-edition',
+              slug: 'lalanasi-lodge-trip',
             },
           ].map((tour) => (
             <article

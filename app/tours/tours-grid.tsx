@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const tours = {
-  'safari-rally-edition': {
+  'lalanasi-lodge-trip': {
     title: 'Lalanasi Lodge & Thompsons Fall',
     heroImage: '/images/lalanasi/1.jpg',
     gallery: [
