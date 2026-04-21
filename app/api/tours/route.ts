@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import { listPublishedTours } from '../../../lib/domain/tours';
+import { listTours } from '../../../lib/data/tours.repo';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const tours = listPublishedTours();
+  const tours = await listTours();
   return NextResponse.json({ tours });
 }
 

@@ -1,153 +1,440 @@
-// app/admin/tours/tour-form-action.tsx
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { TourRecord } from '../../../lib/domain/tours';
 
 type Props = {
   mode: 'create' | 'edit';
-  initial?: {
-    slug: string;
-    title: string;
-    short: string;
-    description: string;
-    price: number;
-    durationDays: number;
-    published: boolean;
-  };
+  initial?: TourRecord;
 };
 
-export default function TourFormAction({ mode, initial }: Props) {
-  const router = useRouter();
-  const [form, setForm] = useState({
+type FeedbackState = {
+  kind: 'error' | 'success';
+  message: string;
+} | null;
+
+function joinLines(items?: string[]) {
+  return items?.join('\n') ?? '';
+}
+
+function parseLines(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function stringifyAvailability(tour?: TourRecord) {
+  return tour?.availability.map((item) => `${item.date} | ${item.status}`).join('\n') ?? '';
+}
+
+function parseAvailability(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => {
+      const [date, status] = line.split('|').map((part) => part.trim());
+      if (!date) return null;
+      return { date, status: status || 'Available' };
+    })
+    .filter(Boolean);
+}
+
+function createInitialState(initial?: TourRecord) {
+  return {
     slug: initial?.slug ?? '',
     title: initial?.title ?? '',
     short: initial?.short ?? '',
+    summary: initial?.summary ?? '',
     description: initial?.description ?? '',
-    price: initial?.price.toString() ?? '',
-    durationDays: initial?.durationDays.toString() ?? '',
-    published: initial?.published ?? false,
-  });
+    heroImage: initial?.heroImage ?? '/images/tour-island.jpg',
+    gallery: joinLines(initial?.gallery),
+    dateLabel: initial?.dateLabel ?? '',
+    location: initial?.location ?? '',
+    priceValue: initial?.priceValue ? String(initial.priceValue) : '',
+    priceLabel: initial?.priceLabel ?? '',
+    mapEmbed: initial?.mapEmbed ?? '',
+    highlights: joinLines(initial?.highlights),
+    includes: joinLines(initial?.includes),
+    excludes: joinLines(initial?.excludes),
+    availability: stringifyAvailability(initial),
+    whatsappNumber: initial?.whatsappNumber ?? '254118706567',
+    featuredOrder: initial?.featuredOrder ? String(initial.featuredOrder) : '999',
+    isFeatured: initial?.isFeatured ?? false,
+    isPublished: initial?.isPublished ?? true,
+  };
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
-    const name = target.name;
-    const value = target.value;
-    const type = (target as HTMLInputElement).type ?? 'text';
-    const checked = (target as HTMLInputElement).checked;
+export default function TourFormAction({ mode, initial }: Props) {
+  const router = useRouter();
+  const [form, setForm] = useState(() => createInitialState(initial));
+  const [feedback, setFeedback] = useState<FeedbackState>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = event.currentTarget;
+    const { name, value } = target;
+
+    if (target instanceof HTMLInputElement && target.type === 'checkbox') {
+      setForm((current) => ({ ...current, [name]: target.checked }));
+      return;
+    }
+
+    setForm((current) => ({ ...current, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!form.slug.trim() || !form.title.trim() || !form.description.trim() || !form.location.trim()) {
+      setFeedback({
+        kind: 'error',
+        message: 'Slug, title, location, and description are required.',
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    setFeedback(null);
 
     const payload = {
       slug: form.slug.trim(),
       title: form.title.trim(),
       short: form.short.trim(),
+      summary: form.summary.trim(),
       description: form.description.trim(),
-      price: Number(form.price),
-      durationDays: Number(form.durationDays),
-      published: form.published,
+      heroImage: form.heroImage.trim(),
+      gallery: parseLines(form.gallery),
+      dateLabel: form.dateLabel.trim(),
+      location: form.location.trim(),
+      priceValue: Number(form.priceValue),
+      priceLabel: form.priceLabel.trim(),
+      mapEmbed: form.mapEmbed.trim(),
+      highlights: parseLines(form.highlights),
+      includes: parseLines(form.includes),
+      excludes: parseLines(form.excludes),
+      availability: parseAvailability(form.availability),
+      whatsappNumber: form.whatsappNumber.trim(),
+      featuredOrder: Number(form.featuredOrder),
+      isFeatured: form.isFeatured,
+      isPublished: form.isPublished,
     };
 
     const url = mode === 'create' ? '/api/admin/tours' : `/api/admin/tours/${initial?.slug}`;
-
     const method = mode === 'create' ? 'POST' : 'PUT';
 
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
+      const response = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setFeedback({
+          kind: 'error',
+          message: response.message || 'Failed to save this tour.',
+        });
+        return;
+      }
+
+      setFeedback({
+        kind: 'success',
+        message: mode === 'create' ? 'Tour created.' : 'Tour updated.',
+      });
       router.push('/admin/tours');
-    } else {
-      const { message } = await res.json().catch(() => ({}));
-      alert(message || 'Failed');
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setFeedback({ kind: 'error', message: 'Failed to save this tour.' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
-      <div>
-        <label className="block font-medium">Slug</label>
-        <input
-          name="slug"
-          value={form.slug}
-          onChange={handleChange}
-          required
-          className="w-full border rounded px-2 py-1"
-          disabled={mode === 'edit'}
-        />
+    <form onSubmit={handleSubmit} className="space-y-7">
+      <section className="premium-card p-6 md:p-8">
+        <p className="eyebrow mb-5">Core story</p>
+        <div className="grid gap-5 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Slug</span>
+            <input
+              name="slug"
+              value={form.slug}
+              onChange={handleChange}
+              required
+              disabled={mode === 'edit'}
+              className="form-control disabled:bg-[#f2dfbf]/50"
+              placeholder="tigoni-experience"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Title</span>
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              required
+              className="form-control"
+              placeholder="Tigoni Experience"
+            />
+          </label>
+        </div>
+
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Short card copy</span>
+            <input
+              name="short"
+              value={form.short}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="A countryside reset with easy adventure."
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Summary</span>
+            <input
+              name="summary"
+              value={form.summary}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="One polished sentence for listings and details."
+            />
+          </label>
+        </div>
+
+        <label className="mt-5 block space-y-2">
+          <span className="text-sm font-bold text-[#21170f]">Full description</span>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            required
+            rows={6}
+            className="form-control"
+            placeholder="Describe the experience, mood, logistics, and what guests should expect."
+          />
+        </label>
+      </section>
+
+      <section className="premium-card p-6 md:p-8">
+        <p className="eyebrow mb-5">Logistics</p>
+        <div className="grid gap-5 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Location</span>
+            <input
+              name="location"
+              value={form.location}
+              onChange={handleChange}
+              required
+              className="form-control"
+              placeholder="Tigoni, Limuru"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Date label</span>
+            <input
+              name="dateLabel"
+              value={form.dateLabel}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="24 Jan 2026"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Price value</span>
+            <input
+              name="priceValue"
+              value={form.priceValue}
+              onChange={handleChange}
+              type="number"
+              min="0"
+              className="form-control"
+              placeholder="2800"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Price label</span>
+            <input
+              name="priceLabel"
+              value={form.priceLabel}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="From KES 2,800"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">WhatsApp number</span>
+            <input
+              name="whatsappNumber"
+              value={form.whatsappNumber}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="254118706567"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Featured order</span>
+            <input
+              name="featuredOrder"
+              value={form.featuredOrder}
+              onChange={handleChange}
+              type="number"
+              min="1"
+              className="form-control"
+            />
+          </label>
+        </div>
+
+        <label className="mt-5 block space-y-2">
+          <span className="text-sm font-bold text-[#21170f]">Map embed URL</span>
+          <input
+            name="mapEmbed"
+            value={form.mapEmbed}
+            onChange={handleChange}
+            className="form-control"
+            placeholder="https://www.google.com/maps?q=Tigoni%20Limuru&output=embed"
+          />
+        </label>
+
+        <div className="mt-6 flex flex-wrap gap-4">
+          <label className="flex items-center gap-3 rounded-full border border-[#21170f]/10 bg-[#fffaf1] px-4 py-3 text-sm font-bold text-[#21170f]">
+            <input
+              name="isPublished"
+              type="checkbox"
+              checked={form.isPublished}
+              onChange={handleChange}
+            />
+            Published
+          </label>
+
+          <label className="flex items-center gap-3 rounded-full border border-[#21170f]/10 bg-[#fffaf1] px-4 py-3 text-sm font-bold text-[#21170f]">
+            <input
+              name="isFeatured"
+              type="checkbox"
+              checked={form.isFeatured}
+              onChange={handleChange}
+            />
+            Featured on home page
+          </label>
+        </div>
+      </section>
+
+      <section className="premium-card p-6 md:p-8">
+        <p className="eyebrow mb-5">Media and itinerary</p>
+        <label className="block space-y-2">
+          <span className="text-sm font-bold text-[#21170f]">Hero image</span>
+          <input
+            name="heroImage"
+            value={form.heroImage}
+            onChange={handleChange}
+            className="form-control"
+            placeholder="/images/tigoni/1.jpg"
+          />
+        </label>
+
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Gallery images</span>
+            <textarea
+              name="gallery"
+              value={form.gallery}
+              onChange={handleChange}
+              rows={7}
+              className="form-control"
+              placeholder="/images/tigoni/1.jpg"
+            />
+            <span className="block text-xs text-[#715f4e]">One image path per line.</span>
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Availability</span>
+            <textarea
+              name="availability"
+              value={form.availability}
+              onChange={handleChange}
+              rows={7}
+              className="form-control"
+              placeholder="24 Jan 2026 | Available"
+            />
+            <span className="block text-xs text-[#715f4e]">Use: date | status.</span>
+          </label>
+        </div>
+
+        <div className="mt-5 grid gap-5 md:grid-cols-3">
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Highlights</span>
+            <textarea
+              name="highlights"
+              value={form.highlights}
+              onChange={handleChange}
+              rows={8}
+              className="form-control"
+              placeholder="Guided hike"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Includes</span>
+            <textarea
+              name="includes"
+              value={form.includes}
+              onChange={handleChange}
+              rows={8}
+              className="form-control"
+              placeholder="Return transport"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Excludes</span>
+            <textarea
+              name="excludes"
+              value={form.excludes}
+              onChange={handleChange}
+              rows={8}
+              className="form-control"
+              placeholder="Personal expenses"
+            />
+          </label>
+        </div>
+      </section>
+
+      {feedback && (
+        <div
+          className={`rounded-2xl px-5 py-4 text-sm font-semibold ${
+            feedback.kind === 'success'
+              ? 'bg-green-50 text-green-700'
+              : 'bg-red-50 text-red-700'
+          }`}
+        >
+          {feedback.message}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <button type="submit" disabled={isSaving} className="btn-primary disabled:opacity-60">
+          {isSaving ? 'Saving...' : mode === 'create' ? 'Create Tour' : 'Save Changes'}
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push('/admin/tours')}
+          className="btn-secondary"
+        >
+          Cancel
+        </button>
       </div>
-      <div>
-        <label className="block font-medium">Title</label>
-        <input
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          required
-          className="w-full border rounded px-2 py-1"
-        />
-      </div>
-      <div>
-        <label className="block font-medium">Short description</label>
-        <input
-          name="short"
-          value={form.short}
-          onChange={handleChange}
-          required
-          className="w-full border rounded px-2 py-1"
-        />
-      </div>
-      <div>
-        <label className="block font-medium">Full description</label>
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          required
-          className="w-full border rounded px-2 py-1"
-          rows={4}
-        />
-      </div>
-      <div>
-        <label className="block font-medium">Price USD</label>
-        <input
-          name="price"
-          value={form.price}
-          onChange={handleChange}
-          required
-          type="number"
-          min="0"
-          className="w-full border rounded px-2 py-1"
-        />
-      </div>
-      <div>
-        <label className="block font-medium">Duration days</label>
-        <input
-          name="durationDays"
-          value={form.durationDays}
-          onChange={handleChange}
-          required
-          type="number"
-          min="1"
-          className="w-full border rounded px-2 py-1"
-        />
-      </div>
-      <div className="flex items-center space-x-2">
-        <input name="published" type="checkbox" checked={form.published} onChange={handleChange} />
-        <label>Published</label>
-      </div>
-      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-        {mode === 'create' ? 'Create' : 'Update'}
-      </button>
     </form>
   );
 }

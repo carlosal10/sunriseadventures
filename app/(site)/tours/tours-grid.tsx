@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import type { TourRecord } from '../../lib/domain/tours';
+import type { TourRecord } from '../../../lib/domain/tours';
 
 type Props = {
   tours: TourRecord[];

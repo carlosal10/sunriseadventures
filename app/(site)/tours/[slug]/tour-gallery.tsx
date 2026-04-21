@@ -21,7 +21,12 @@ export default function TourGallery({ images, title }: Props) {
           aria-label="Close gallery preview"
         >
           <div className="relative h-full max-h-[82vh] w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/15">
-            <Image src={lightbox} alt={`${title} gallery preview`} fill className="object-contain" />
+            <Image
+              src={lightbox}
+              alt={`${title} gallery preview`}
+              fill
+              className="object-contain"
+            />
           </div>
         </button>
       )}

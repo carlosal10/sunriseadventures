@@ -1,28 +1,44 @@
-// app/admin/tours/delete-tour-button.tsx
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-type Props = { slug: string };
+type Props = { slug: string; title: string };
 
-export default function DeleteTourButton({ slug }: Props) {
+export default function DeleteTourButton({ slug, title }: Props) {
   const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm('Delete this tour?')) return;
-    const res = await fetch(`/api/admin/tours/${slug}`, {
-      method: 'DELETE',
-    });
-    if (res.ok) {
+    if (!confirm(`Delete "${title}"? This removes it from public pages and the API.`)) return;
+
+    setIsDeleting(true);
+
+    try {
+      const res = await fetch(`/api/admin/tours/${slug}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        alert(payload.message || 'Failed to delete this tour.');
+        return;
+      }
+
       router.refresh();
-    } else {
-      alert('Failed to delete');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
-    <button onClick={handleDelete} className="text-red-600">
-      Delete
+    <button
+      type="button"
+      onClick={handleDelete}
+      disabled={isDeleting}
+      className="inline-flex items-center justify-center rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {isDeleting ? 'Deleting...' : 'Delete'}
     </button>
   );
 }

@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getPublishedTourBySlug } from '../../../lib/domain/tours';
+import { getTour } from '../../../../lib/data/tours.repo';
 import TourGallery from './tour-gallery';
 
-export default function TourDetails({ params }: { params: { slug: string } }) {
-  const tour = getPublishedTourBySlug(params.slug);
+export const dynamic = 'force-dynamic';
+
+export default async function TourDetails({ params }: { params: { slug: string } }) {
+  const tour = await getTour(params.slug);
 
   if (!tour) {
     notFound();

@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import HomeHeroSlideshow from './components/HomeHeroSlideshow';
-import { listFeaturedTours } from '../lib/domain/tours';
+import HomeHeroSlideshow from '../components/HomeHeroSlideshow';
+import { listFeaturedTours } from '../../lib/data/tours.repo';
+
+export const dynamic = 'force-dynamic';
 
 const experiences = [
   { name: 'Forest Hikes', image: '/images/hiking.jpg', note: 'Guided trail days' },
@@ -25,8 +27,8 @@ const promises = [
   },
 ];
 
-export default function Home() {
-  const featuredTours = listFeaturedTours(6);
+export default async function Home() {
+  const featuredTours = await listFeaturedTours(6);
 
   return (
     <div className="space-y-24">

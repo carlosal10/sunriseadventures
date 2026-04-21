@@ -1,10 +1,12 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getPublishedTourBySlug } from '../../../../lib/domain/tours';
+import { getTour } from '../../../../../lib/data/tours.repo';
 import BookTourForm from './book-tour-form';
 
-export default function BookTourPage({ params }: { params: { slug: string } }) {
-  const tour = getPublishedTourBySlug(params.slug);
+export const dynamic = 'force-dynamic';
+
+export default async function BookTourPage({ params }: { params: { slug: string } }) {
+  const tour = await getTour(params.slug);
 
   if (!tour) {
     notFound();

@@ -4,12 +4,15 @@ import type { NextRequest } from 'next/server';
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
 
-  // Only protect /admin paths
-  if (url.pathname.startsWith('/admin')) {
-    // TEMP: simple check; replace with real auth
+  if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/admin')) {
     const hasAdminCookie = req.cookies.get('isAdmin')?.value === '1';
+
     if (!hasAdminCookie) {
-      url.pathname = '/auth/signin'; // or a generic access denied page
+      if (url.pathname.startsWith('/api/admin')) {
+        return NextResponse.json({ message: 'Admin sign-in required.' }, { status: 401 });
+      }
+
+      url.pathname = '/auth/signin';
       return NextResponse.redirect(url);
     }
   }
@@ -18,5 +21,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 };
