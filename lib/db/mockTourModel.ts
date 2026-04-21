@@ -1,69 +1,105 @@
-type Tour = {
-  _id?: string
-  slug: string
-  title: string
-  short: string
-  description: string
-  price: number
-  durationDays: number
-  published?: boolean
+import { listAllTours, type TourRecord } from '../domain/tours';
+
+type MockTour = TourRecord & {
+  _id?: string;
+  published?: boolean;
+};
+
+const seed: MockTour[] = listAllTours().map((tour, index) => ({
+  _id: String(index + 1),
+  published: tour.isPublished,
+  ...tour,
+}));
+
+function clone<T>(value: T) {
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
-const seed: Tour[] = [
-  {
-    _id: '1',
-    slug: 'island-getaway',
-    title: 'Island Getaway',
-    short: 'Relax at a beachfront resort',
-    description: '5-day island escape with snorkeling',
-    price: 899,
-    durationDays: 5,
-    published: true,
-  },
-]
+function matchesFilter(tour: MockTour, filter?: Record<string, unknown>) {
+  if (!filter || Object.keys(filter).length === 0) return true;
 
-function clone<T>(v: T) {
-  return JSON.parse(JSON.stringify(v)) as T
+  if (typeof filter.slug === 'string' && tour.slug !== filter.slug) return false;
+
+  if (typeof filter.isPublished === 'boolean' && tour.isPublished !== filter.isPublished) {
+    return false;
+  }
+
+  if (typeof filter.published === 'boolean' && tour.isPublished !== filter.published) {
+    return false;
+  }
+
+  return true;
 }
 
 export const mockTourModel = {
-  async find(filter?: any) {
-    if (!filter || Object.keys(filter).length === 0) return clone(seed)
-    return clone(seed.filter((t) => {
-      if (filter.published !== undefined) return !!t.published === !!filter.published
-      return true
-    }))
+  async find(filter?: Record<string, unknown>) {
+    return clone(seed.filter((tour) => matchesFilter(tour, filter)));
   },
 
-  async findOne(filter: any) {
-    if (!filter) return null
-    return clone(seed.find((t) => t.slug === filter.slug && (filter.published === undefined || !!t.published === !!filter.published)) || null)
+  async findOne(filter: Record<string, unknown>) {
+    return clone(seed.find((tour) => matchesFilter(tour, filter)) ?? null);
   },
 
-  async findOneAndUpdate(filter: any, update: any, opts: any) {
-    const t = seed.find((x) => x.slug === filter.slug)
-    if (!t) return null
-    const set = update.$set || {}
-    Object.assign(t, set)
-    return clone(t)
+  async findOneAndUpdate(filter: Record<string, unknown>, update: any) {
+    const tour = seed.find((item) => matchesFilter(item, filter));
+    if (!tour) return null;
+
+    const set = update.$set || {};
+    Object.assign(tour, set);
+
+    if (set.published !== undefined && set.isPublished === undefined) {
+      tour.isPublished = Boolean(set.published);
+    }
+
+    if (set.isPublished !== undefined) {
+      tour.published = Boolean(set.isPublished);
+    }
+
+    return clone(tour);
   },
 
-  async findOneAndDelete(filter: any) {
-    const idx = seed.findIndex((x) => x.slug === filter.slug)
-    if (idx === -1) return null
-    const [deleted] = seed.splice(idx, 1)
-    return clone(deleted)
+  async findOneAndDelete(filter: Record<string, unknown>) {
+    const index = seed.findIndex((tour) => matchesFilter(tour, filter));
+    if (index === -1) return null;
+
+    const [deleted] = seed.splice(index, 1);
+    return clone(deleted);
   },
 
-  async create(data: Partial<Tour>) {
-    const doc: any = { _id: String(seed.length + 1), ...data }
-    seed.push(doc as Tour)
-    return clone(doc)
+  async create(data: Partial<MockTour>) {
+    const doc: MockTour = {
+      _id: String(seed.length + 1),
+      id: data.id ?? data.slug ?? `tour-${seed.length + 1}`,
+      slug: data.slug ?? `tour-${seed.length + 1}`,
+      title: data.title ?? 'Untitled Tour',
+      short: data.short ?? '',
+      summary: data.summary ?? data.description ?? '',
+      description: data.description ?? '',
+      heroImage: data.heroImage ?? '/images/tour-island.jpg',
+      gallery: data.gallery ?? [],
+      dateLabel: data.dateLabel ?? '',
+      location: data.location ?? '',
+      priceLabel: data.priceLabel ?? '',
+      priceValue: data.priceValue ?? 0,
+      mapEmbed: data.mapEmbed ?? '',
+      highlights: data.highlights ?? [],
+      includes: data.includes ?? [],
+      excludes: data.excludes ?? [],
+      availability: data.availability ?? [],
+      testimonials: data.testimonials ?? [],
+      isFeatured: Boolean(data.isFeatured),
+      isPublished: data.isPublished ?? data.published ?? true,
+      featuredOrder: data.featuredOrder ?? seed.length + 1,
+      whatsappNumber: data.whatsappNumber ?? '254118706567',
+      published: data.isPublished ?? data.published ?? true,
+    };
+
+    seed.push(doc);
+    return clone(doc);
   },
 
-  async insertMany(items: Partial<Tour>[]) {
-    const docs = items.map((it, i) => ({ _id: String(seed.length + i + 1), ...it }))
-    seed.push(...(docs as Tour[]))
-    return clone(docs)
+  async insertMany(items: Partial<MockTour>[]) {
+    const docs = await Promise.all(items.map((item) => this.create(item)));
+    return clone(docs);
   },
-}
+};

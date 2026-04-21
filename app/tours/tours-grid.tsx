@@ -1,95 +1,50 @@
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
+import type { TourRecord } from '../../lib/domain/tours';
 
-const tours = {
-  'lalanasi-lodge-trip': {
-    title: 'Lalanasi Lodge & Thompsons Fall',
-    heroImage: '/images/lalanasi/1.jpg',
-    gallery: [
-      '/images/lalanasi/1.jpg',
-      '/images/lalanasi/2.jpg',
-      '/images/lalanasi/3.jpg',
-      '/images/lalanasi/4.jpg',
-       '/images/lalanasi/5.jpg',
-      '/images/lalanasi/6.jpg',
-    ],
-    video: '',
-
-    date: '4th May 2026',
-    location: 'Various Locations in Kenya',
-
-    price: 'KES 4,000',
-    mapEmbed: 'https://maps.app.goo.gl/m3JkXjQnPFfzLZXd6=embed',
-    description: `Experience the thrill of the Safari Rally like never before with our exclusive Safari Rally Edition tour. Witness the high-octane action up close as you explore various iconic locations across Kenya.`,
-    highlights: [
-      'Transport To & From',
-      'Photography',
-      'Team Building',
-      'Scenic hike',
-      'QuadBike Experience',
-      'Swimming',
-      'Thompsons fall chase',
-      'Lunch',
-      'Farm Tour',
-    ],
-    includes: ['Return transport', 'Lunch', 'Professional guide', 'Entry fees'],
-    excludes: [ 'Personal expenses'],
-    availability: [{ date: '20 Jun 2026', status: 'Available' }],
-    testimonials: [],
-  },
+type Props = {
+  tours: TourRecord[];
 };
 
-type Tour = {
-  id?: string;
-  title: string;
-  short?: string;
-  heroImage: string;
-  description: string;
-  location: string;
-  price: string;
-};
-
-export default function ToursGrid({ tours }: { tours: Record<string, Tour> }) {
-  // Convert tours object to array for display
-  const toursArray = Object.entries(tours).map(([slug, tour]: any) => ({
-    slug,
-    ...tour,
-  }));
-
+export default function ToursGrid({ tours }: Props) {
   return (
     <div className="space-y-12">
       <div>
-        <h1 className="text-4xl font-extrabold mb-4">Our Tours</h1>
-        <p className="text-gray-600 text-lg">Explore unforgettable adventures across Kenya</p>
+        <h1 className="mb-4 text-4xl font-extrabold">Our Tours</h1>
+        <p className="text-lg text-gray-600">
+          Explore unforgettable adventures across Kenya with one trusted team.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {toursArray.map((tour: any) => (
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {tours.map((tour) => (
           <Link key={tour.slug} href={`/tours/${tour.slug}`} className="group">
-            <div className="border rounded-xl overflow-hidden hover:shadow-lg transition">
+            <article className="overflow-hidden rounded-xl border transition hover:shadow-lg">
               <div className="relative h-48 overflow-hidden">
                 <Image
                   src={tour.heroImage}
                   alt={tour.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition"
+                  className="object-cover transition group-hover:scale-105"
                 />
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 group-hover:text-orange-600 transition">
-                  {tour.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-3">
-                  {tour.description.substring(0, 100)}...
-                </p>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">{tour.location}</span>
-                  <span className="font-bold text-orange-600">{tour.price}</span>
+
+              <div className="space-y-3 p-6">
+                <div>
+                  <h3 className="mb-1 text-xl font-bold transition group-hover:text-orange-600">
+                    {tour.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">{tour.location}</p>
+                </div>
+
+                <p className="text-sm text-gray-600">{tour.summary}</p>
+
+                <div className="flex items-center justify-between gap-3 pt-2">
+                  <span className="text-sm text-gray-500">{tour.dateLabel}</span>
+                  <span className="font-bold text-orange-600">{tour.priceLabel}</span>
                 </div>
               </div>
-            </div>
+            </article>
           </Link>
         ))}
       </div>

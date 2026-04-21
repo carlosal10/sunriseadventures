@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-/* HERO SLIDESHOW ITEMS */
 const heroSlides = [
   {
     image: '/images/merch-hoodie.jpg',
@@ -23,7 +22,6 @@ const heroSlides = [
   },
 ];
 
-/* MERCH PRODUCTS */
 const products = [
   {
     id: 'sunrise-hoodie',
@@ -49,23 +47,14 @@ const products = [
     category: 'Apparel',
     inStock: true,
   },
-  {
-    id: 'sunrise-water-bottle',
-    name: 'Sunrise Water Bottle',
-    price: 'KES 1000',
-    image: '/images/merch-bottle.jpg',
-    category: 'Gear',
-    inStock: true,
-  },
 ];
 
 export default function MerchandisePage() {
   const [activeSlide, setActiveSlide] = useState(0);
 
-  /* AUTO SLIDE */
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
+      setActiveSlide((current) => (current + 1) % heroSlides.length);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -73,11 +62,10 @@ export default function MerchandisePage() {
 
   return (
     <div className="space-y-20">
-      {/* ================= HERO SLIDESHOW ================= */}
-      <section className="relative h-[50vh] min-h-[380px] rounded-2xl overflow-hidden">
+      <section className="relative min-h-[380px] overflow-hidden rounded-2xl h-[50vh]">
         {heroSlides.map((slide, index) => (
           <div
-            key={index}
+            key={slide.image}
             className={`absolute inset-0 transition-opacity duration-1000 ${
               index === activeSlide ? 'opacity-100' : 'opacity-0'
             }`}
@@ -93,61 +81,59 @@ export default function MerchandisePage() {
           </div>
         ))}
 
-        {/* HERO CONTENT */}
-        <div className="relative z-10 h-full flex items-center">
-          <div className="px-8 max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
+        <div className="relative z-10 flex h-full items-center">
+          <div className="max-w-3xl px-8">
+            <h1 className="mb-4 text-4xl font-extrabold text-white md:text-5xl">
               {heroSlides[activeSlide].title}
             </h1>
-            <p className="text-lg text-gray-200 mb-6">{heroSlides[activeSlide].subtitle}</p>
+            <p className="mb-6 text-lg text-gray-200">{heroSlides[activeSlide].subtitle}</p>
 
             <Link
               href="#shop"
-              className="inline-block bg-orange-600 hover:bg-orange-700 text-white px-7 py-3 rounded-lg font-semibold"
+              className="inline-block rounded-lg bg-orange-600 px-7 py-3 font-semibold text-white hover:bg-orange-700"
             >
               Shop Merchandise
             </Link>
           </div>
         </div>
 
-        {/* SLIDE INDICATORS */}
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-          {heroSlides.map((_, index) => (
+        <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 gap-3">
+          {heroSlides.map((slide, index) => (
             <button
-              key={index}
+              key={slide.image}
+              type="button"
               onClick={() => setActiveSlide(index)}
               className={`h-2.5 w-2.5 rounded-full transition ${
                 index === activeSlide ? 'bg-white' : 'bg-white/40'
               }`}
+              aria-label={`Show slide ${index + 1}`}
             />
           ))}
         </div>
       </section>
 
-      {/* ================= CATEGORIES ================= */}
       <section className="flex flex-wrap gap-4">
-        {['All', 'Apparel', 'Accessories', 'Gear'].map((cat) => (
+        {['All', 'Apparel', 'Accessories'].map((category) => (
           <span
-            key={cat}
-            className="px-4 py-2 rounded-full border text-sm font-medium text-gray-700 hover:bg-orange-500 hover:text-white cursor-pointer transition"
+            key={category}
+            className="cursor-pointer rounded-full border px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-orange-500 hover:text-white"
           >
-            {cat}
+            {category}
           </span>
         ))}
       </section>
 
-      {/* ================= PRODUCTS ================= */}
       <section id="shop">
-        <h2 className="text-3xl font-bold mb-8">Shop Merchandise</h2>
+        <h2 className="mb-8 text-3xl font-bold">Shop Merchandise</h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
             <article
               key={product.id}
-              className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition relative"
+              className="relative overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md"
             >
               {!product.inStock && (
-                <span className="absolute top-3 left-3 bg-black/80 text-white text-xs px-3 py-1 rounded-full z-10">
+                <span className="absolute left-3 top-3 z-10 rounded-full bg-black/80 px-3 py-1 text-xs text-white">
                   Sold Out
                 </span>
               )}
@@ -156,11 +142,11 @@ export default function MerchandisePage() {
                 <Image src={product.image} alt={product.name} fill className="object-cover" />
               </div>
 
-              <div className="p-4 space-y-2">
-                <h3 className="font-semibold text-lg">{product.name}</h3>
+              <div className="space-y-2 p-4">
+                <h3 className="text-lg font-semibold">{product.name}</h3>
                 <p className="text-sm text-gray-500">{product.category}</p>
 
-                <div className="flex justify-between items-center pt-2">
+                <div className="flex items-center justify-between pt-2">
                   <span className="font-bold text-orange-600">{product.price}</span>
 
                   {product.inStock ? (
@@ -168,7 +154,7 @@ export default function MerchandisePage() {
                       href="/contact"
                       className="text-sm font-medium text-orange-600 hover:underline"
                     >
-                      Order →
+                      Order -&gt;
                     </Link>
                   ) : (
                     <span className="text-sm text-gray-400">Unavailable</span>
@@ -180,16 +166,15 @@ export default function MerchandisePage() {
         </div>
       </section>
 
-      {/* ================= CTA ================= */}
-      <section className="bg-gray-100 rounded-2xl p-10 text-center">
-        <h2 className="text-3xl font-bold mb-4">Bulk Orders & Custom Merchandise</h2>
-        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-          Ideal for hiking groups, corporate retreats, and adventure events. Custom branding
+      <section className="rounded-2xl bg-gray-100 p-10 text-center">
+        <h2 className="mb-4 text-3xl font-bold">Bulk Orders and Custom Merchandise</h2>
+        <p className="mx-auto mb-6 max-w-2xl text-gray-600">
+          Ideal for hiking groups, corporate retreats, and adventure events. Custom branding is
           available.
         </p>
         <Link
           href="/contact"
-          className="inline-block bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-semibold"
+          className="inline-block rounded-lg bg-orange-600 px-8 py-3 font-semibold text-white hover:bg-orange-700"
         >
           Request a Quote
         </Link>

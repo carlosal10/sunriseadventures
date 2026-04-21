@@ -1,158 +1,41 @@
-'use client';
+import { notFound } from 'next/navigation';
+import { getPublishedTourBySlug } from '../../../../lib/domain/tours';
+import BookTourForm from './book-tour-form';
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
+export default function BookTourPage({ params }: { params: { slug: string } }) {
+  const tour = getPublishedTourBySlug(params.slug);
 
-export default function BookTourPage() {
-  const { slug } = useParams();
-
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    people: '1',
-    message: '',
-  });
-
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  // Kenyan phone validation
-  const isValidKenyanPhone = (phone: string) => {
-    const normalized = phone.replace(/\D/g, ''); // remove non-digits
-    return /^(?:2547\d{8}|07\d{8})$/.test(normalized);
-  };
-
-  const handleSubmit = async () => {
-    if (!form.name || !form.phone || !form.people) {
-      alert('Please fill all required fields.');
-      return;
-    }
-
-    if (!isValidKenyanPhone(form.phone)) {
-      alert('Please enter a valid Kenyan phone number.');
-      return;
-    }
-
-    setLoading(true);
-
-    const text = `
-*New Tour Booking Request* 🌍
-
-*Tour:* ${slug}
-*Name:* ${form.name}
-*Phone:* ${form.phone}
-*Email:* ${form.email}
-*Number of People:* ${form.people}
-
-*Message:*
-${form.message}
-    `;
-
-    try {
-      // Log booking to DB first
-      await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, tour: slug }),
-      });
-
-      const phoneNumber = '254118706567';
-      const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(text)}`;
-
-      // Fallback if WhatsApp not installed
-      const newWindow = window.open(whatsappURL, '_blank');
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-        alert('Could not open WhatsApp. Please make sure WhatsApp is installed.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Booking failed. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!tour) {
+    notFound();
+  }
 
   return (
-    <div className="max-w-3xl mx-auto py-14 space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8 py-14">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Book This Tour</h1>
+        <h1 className="mb-2 text-3xl font-bold">Book {tour.title}</h1>
         <p className="text-gray-600">
-          Fill in the details below and we’ll confirm availability via WhatsApp.
+          Share your details below and we will save your booking request before opening WhatsApp to
+          continue the conversation.
         </p>
       </div>
 
-      <div className="bg-white border rounded-2xl p-6 space-y-5 shadow-sm">
-        <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          required
-          value={form.name}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-3"
-        />
-
-        <input
-          type="tel"
-          name="phone"
-          placeholder="Phone Number"
-          required
-          value={form.phone}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-3"
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-3"
-        />
-
-        <select
-          name="people"
-          value={form.people}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-3"
-        >
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-            <option key={n} value={n}>
-              {n} Person{n > 1 && 's'}
-            </option>
-          ))}
-        </select>
-
-        <textarea
-          name="message"
-          placeholder="Any special requests or questions?"
-          rows={4}
-          value={form.message}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-3"
-        />
-
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={loading}
-          className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-lg font-semibold disabled:opacity-50"
-        >
-          {loading ? 'Submitting...' : 'Submit Booking'}
-        </button>
-
-        <Link href={`/tours/${slug}`} className="block text-center text-sm text-gray-500">
-          ← Back to tour details
-        </Link>
+      <div className="rounded-2xl border bg-orange-50/50 p-5 text-sm text-gray-700">
+        <p className="font-semibold text-gray-900">{tour.title}</p>
+        <p>{tour.location}</p>
+        <p>
+          {tour.dateLabel} | {tour.priceLabel}
+        </p>
       </div>
+
+      <BookTourForm
+        tour={{
+          slug: tour.slug,
+          title: tour.title,
+          dateLabel: tour.dateLabel,
+          priceLabel: tour.priceLabel,
+          whatsappNumber: tour.whatsappNumber,
+        }}
+      />
     </div>
   );
 }
