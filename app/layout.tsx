@@ -77,7 +77,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                               <li>Camping Adventures</li>
                               <li>Coastal Getaways</li>
                               <li>Game Drive Safaris</li>
-                              <li>WRC Safari Rally Trips</li>
+                              <li>Lalanasi Lodge Trips</li>
                             </ul>
                           </div>
             
