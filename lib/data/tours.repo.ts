@@ -246,7 +246,8 @@ export async function getTour(slug: string) {
 export async function getTourAdmin(slug: string) {
   const tour = await withTourStore(
     async () => Tour.findOne({ slug }).lean(),
-    async () => mockTourModel.findOne({ slug })
+    async () => mockTourModel.findOne({ slug }),
+    { fallbackOnDatabaseError: false }
   );
 
   return tour ? normalizeTour(tour) : null;
@@ -255,7 +256,8 @@ export async function getTourAdmin(slug: string) {
 export async function listAllToursAdmin() {
   const tours = await withTourStore(
     async () => Tour.find().sort({ featuredOrder: 1, title: 1 }).lean(),
-    async () => mockTourModel.find()
+    async () => mockTourModel.find(),
+    { fallbackOnDatabaseError: false }
   );
 
   return sortTours((tours as any[]).map(normalizeTour));

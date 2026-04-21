@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { deleteTourBySlug, updateTourBySlug } from '../../../../../lib/data/tours.repo';
+import { getDatabaseErrorMessage } from '../../../../../lib/db/error-message';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export async function PUT(req: Request, { params }: { params: { slug: string } }
   } catch (error) {
     console.error('Failed to update tour:', error);
     return NextResponse.json(
-      { message: 'Tour could not be saved. Check the database connection and try again.' },
+      { message: getDatabaseErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -56,7 +57,7 @@ export async function DELETE(_: Request, { params }: { params: { slug: string } 
   } catch (error) {
     console.error('Failed to delete tour:', error);
     return NextResponse.json(
-      { message: 'Tour could not be deleted. Check the database connection and try again.' },
+      { message: getDatabaseErrorMessage(error) },
       { status: 500 }
     );
   }

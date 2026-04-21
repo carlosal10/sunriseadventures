@@ -60,3 +60,6 @@ storybook-static/
 # Build artifacts
 *.tgz
 dist-*/
+
+# Runtime uploads
+public/uploads/

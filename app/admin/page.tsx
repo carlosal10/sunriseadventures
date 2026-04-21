@@ -1,14 +1,27 @@
 import Link from 'next/link';
 import { listBookings } from '../../lib/data/bookings.repo';
 import { listAllToursAdmin } from '../../lib/data/tours.repo';
+import { getDatabaseErrorMessage } from '../../lib/db/error-message';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Admin() {
-  const [tours, bookings] = await Promise.all([listAllToursAdmin(), listBookings()]);
+  let tours = [];
+  let bookings: any[] = [];
+  let loadError = '';
+
+  try {
+    const [loadedTours, loadedBookings] = await Promise.all([listAllToursAdmin(), listBookings()]);
+    tours = loadedTours;
+    bookings = loadedBookings as any[];
+  } catch (error) {
+    console.error('Failed to load admin dashboard:', error);
+    loadError = getDatabaseErrorMessage(error);
+  }
+
   const publishedTours = tours.filter((tour) => tour.isPublished).length;
   const featuredTours = tours.filter((tour) => tour.isFeatured).length;
-  const recentBookings = (bookings as any[]).slice(0, 4);
+  const recentBookings = bookings.slice(0, 4);
 
   return (
     <div className="space-y-8">
@@ -28,6 +41,13 @@ export default async function Admin() {
           </Link>
         </div>
       </section>
+
+      {loadError && (
+        <section className="premium-card border-red-200 bg-red-50 p-6 text-red-800">
+          <p className="text-sm font-bold uppercase tracking-[0.18em]">Database attention needed</p>
+          <p className="mt-3 leading-7">{loadError}</p>
+        </section>
+      )}
 
       <section className="grid gap-5 md:grid-cols-3">
         {[

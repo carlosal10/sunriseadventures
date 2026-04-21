@@ -1,18 +1,19 @@
 import Link from 'next/link';
 import AdminToursTable from './admin-tours-table';
 import { listAllToursAdmin } from '../../../lib/data/tours.repo';
+import { getDatabaseErrorMessage } from '../../../lib/db/error-message';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminToursPage() {
   let tours = [];
-  let loadError = false;
+  let loadError = '';
 
   try {
     tours = await listAllToursAdmin();
   } catch (error) {
-    loadError = true;
     console.error('Failed to load admin tours:', error);
+    loadError = getDatabaseErrorMessage(error);
   }
 
   return (
@@ -34,8 +35,9 @@ export default async function AdminToursPage() {
       </section>
 
       {loadError ? (
-        <div className="premium-card border-amber-200 bg-amber-50 p-6 text-amber-900">
-          Tours could not be loaded right now. Check the MongoDB connection and try again.
+        <div className="premium-card border-red-200 bg-red-50 p-6 text-red-800">
+          <p className="text-sm font-bold uppercase tracking-[0.18em]">Database attention needed</p>
+          <p className="mt-3 leading-7">{loadError}</p>
         </div>
       ) : tours.length > 0 ? (
         <AdminToursTable tours={tours} />

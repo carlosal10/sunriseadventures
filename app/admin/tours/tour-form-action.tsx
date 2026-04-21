@@ -14,6 +14,8 @@ type FeedbackState = {
   message: string;
 } | null;
 
+type UploadTarget = 'hero' | 'gallery';
+
 function joinLines(items?: string[]) {
   return items?.join('\n') ?? '';
 }
@@ -70,6 +72,7 @@ export default function TourFormAction({ mode, initial }: Props) {
   const [form, setForm] = useState(() => createInitialState(initial));
   const [feedback, setFeedback] = useState<FeedbackState>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingTarget, setUploadingTarget] = useState<UploadTarget | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const target = event.currentTarget;
@@ -81,6 +84,76 @@ export default function TourFormAction({ mode, initial }: Props) {
     }
 
     setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    target: UploadTarget
+  ) => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+
+    if (!file) return;
+
+    setUploadingTarget(target);
+    setFeedback(null);
+
+    const body = new FormData();
+    body.append('file', file);
+
+    try {
+      const response = await fetch('/api/admin/uploads', {
+        method: 'POST',
+        body,
+      });
+      const payload = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        url?: string;
+      };
+
+      if (!response.ok || !payload.url) {
+        setFeedback({
+          kind: 'error',
+          message: payload.message || 'Image upload failed.',
+        });
+        return;
+      }
+
+      const uploadedUrl = payload.url;
+
+      setForm((current) => {
+        const galleryItems = parseLines(current.gallery);
+        const gallery = galleryItems.includes(uploadedUrl)
+          ? current.gallery
+          : [...galleryItems, uploadedUrl].join('\n');
+
+        if (target === 'hero') {
+          return {
+            ...current,
+            heroImage: uploadedUrl,
+            gallery,
+          };
+        }
+
+        return {
+          ...current,
+          gallery,
+        };
+      });
+
+      setFeedback({
+        kind: 'success',
+        message:
+          target === 'hero'
+            ? 'Hero image uploaded and added to the gallery.'
+            : 'Gallery image uploaded.',
+      });
+    } catch (error) {
+      console.error(error);
+      setFeedback({ kind: 'error', message: 'Image upload failed.' });
+    } finally {
+      setUploadingTarget(null);
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -333,20 +406,58 @@ export default function TourFormAction({ mode, initial }: Props) {
 
       <section className="premium-card p-6 md:p-8">
         <p className="eyebrow mb-5">Media and itinerary</p>
-        <label className="block space-y-2">
-          <span className="text-sm font-bold text-[#21170f]">Hero image</span>
-          <input
-            name="heroImage"
-            value={form.heroImage}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="/images/tigoni/1.jpg"
-          />
-        </label>
+        <div className="space-y-3">
+          <label className="block space-y-2">
+            <span className="text-sm font-bold text-[#21170f]">Hero image</span>
+            <input
+              name="heroImage"
+              value={form.heroImage}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="/images/tigoni/1.jpg"
+            />
+          </label>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label className="btn-secondary cursor-pointer px-5 py-2">
+              {uploadingTarget === 'hero' ? 'Uploading hero...' : 'Upload Hero Image'}
+              <input
+                type="file"
+                accept="image/avif,image/gif,image/jpeg,image/png,image/webp"
+                className="sr-only"
+                onChange={(event) => handleImageUpload(event, 'hero')}
+                disabled={uploadingTarget !== null}
+              />
+            </label>
+
+            {form.heroImage && (
+              <a
+                href={form.heroImage}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-bold text-[#b86232] transition hover:text-[#16372c]"
+              >
+                Preview current hero image
+              </a>
+            )}
+          </div>
+        </div>
 
         <div className="mt-5 grid gap-5 md:grid-cols-2">
-          <label className="space-y-2">
-            <span className="text-sm font-bold text-[#21170f]">Gallery images</span>
+          <div className="space-y-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-sm font-bold text-[#21170f]">Gallery images</span>
+              <label className="btn-secondary cursor-pointer px-4 py-2">
+                {uploadingTarget === 'gallery' ? 'Uploading...' : 'Upload Gallery Image'}
+                <input
+                  type="file"
+                  accept="image/avif,image/gif,image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={(event) => handleImageUpload(event, 'gallery')}
+                  disabled={uploadingTarget !== null}
+                />
+              </label>
+            </div>
             <textarea
               name="gallery"
               value={form.gallery}
@@ -355,8 +466,10 @@ export default function TourFormAction({ mode, initial }: Props) {
               className="form-control"
               placeholder="/images/tigoni/1.jpg"
             />
-            <span className="block text-xs text-[#715f4e]">One image path per line.</span>
-          </label>
+            <span className="block text-xs text-[#715f4e]">
+              Upload images or paste paths manually. One image path per line.
+            </span>
+          </div>
 
           <label className="space-y-2">
             <span className="text-sm font-bold text-[#21170f]">Availability</span>

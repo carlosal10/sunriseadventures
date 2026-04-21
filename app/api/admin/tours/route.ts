@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createTour, listAllToursAdmin } from '../../../../lib/data/tours.repo';
+import { getDatabaseErrorMessage } from '../../../../lib/db/error-message';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Failed to create tour:', error);
     return NextResponse.json(
-      { message: 'Tour could not be saved. Check the database connection and try again.' },
+      { message: getDatabaseErrorMessage(error) },
       { status: 500 }
     );
   }
