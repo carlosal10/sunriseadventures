@@ -6,23 +6,24 @@ import Image from 'next/image';
 const aboutSlides = [
   {
     src: '/images/about-hero.jpg',
-    title: 'About Sunrise Tours & Adventure',
+    title: 'Premium adventures with a Kenyan heartbeat',
     text: 'More than trips - we create bold experiences, real connections, and lasting memories.',
   },
   {
     src: '/images/about-hero-2.jpg',
-    title: 'Built for True Explorers',
+    title: 'Built for true explorers',
     text: 'Adventure-filled journeys designed for people who crave more than ordinary travel.',
   },
   {
     src: '/images/about-hero-3.jpg',
-    title: 'Moments That Matter',
+    title: 'Moments that feel considered',
     text: 'From mountain trails to iconic events, every experience is crafted with purpose.',
   },
 ];
 
 function AboutHeroSlideshow() {
   const [index, setIndex] = useState(0);
+  const activeSlide = aboutSlides[index];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,7 +34,7 @@ function AboutHeroSlideshow() {
   }, []);
 
   return (
-    <section className="relative min-h-[350px] overflow-hidden rounded-2xl h-[50vh]">
+    <section className="relative min-h-[520px] overflow-hidden rounded-[2.5rem] border border-white/60 shadow-[0_28px_90px_rgba(63,41,22,0.16)] h-[60vh]">
       {aboutSlides.map((slide, slideIndex) => (
         <div
           key={slide.src}
@@ -48,16 +49,17 @@ function AboutHeroSlideshow() {
             priority={slideIndex === 0}
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#160f0a]/85 via-[#160f0a]/42 to-transparent" />
         </div>
       ))}
 
-      <div className="relative z-10 flex h-full items-center">
-        <div className="max-w-3xl px-8">
-          <h1 className="mb-4 text-4xl font-extrabold text-white md:text-5xl">
-            {aboutSlides[index].title}
+      <div className="relative z-10 flex h-full items-end p-7 md:p-12">
+        <div className="max-w-4xl">
+          <p className="eyebrow mb-4 text-[#f0bd6b]">About Sunrise</p>
+          <h1 className="font-display text-5xl font-semibold leading-[0.92] tracking-[-0.055em] text-[#fffaf1] md:text-7xl">
+            {activeSlide.title}
           </h1>
-          <p className="text-lg text-gray-200 md:text-xl">{aboutSlides[index].text}</p>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-white/78">{activeSlide.text}</p>
         </div>
       </div>
     </section>
@@ -69,83 +71,70 @@ export default function About() {
     <div className="space-y-20">
       <AboutHeroSlideshow />
 
-      <section className="max-w-4xl space-y-6">
-        <p className="text-lg leading-relaxed text-gray-700">
-          <strong>Sunrise Tours & Adventure</strong> is a dynamic and modern travel and adventure
-          company built for explorers who crave more than ordinary trips. We are passionate about
-          creating exciting, well-curated outdoor experiences that bring people closer to nature,
-          adventure, and each other.
-        </p>
-
-        <p className="text-lg leading-relaxed text-gray-700">
-          From scenic hikes and waterfall chases to farm adventures, camping experiences, game drive
-          safaris, and major event trips such as the WRC Safari Rally, we design journeys that are
-          bold, memorable, and full of life.
-        </p>
-      </section>
-
-      <section className="max-w-4xl space-y-6">
-        <p className="text-lg leading-relaxed text-gray-700">
-          At Sunrise Tours & Adventure, we believe travel is about moments, energy, and connection.
-          Our experiences are designed for individuals, couples, friends, and groups who want to
-          escape routine, explore Kenya&apos;s diverse landscapes, and create stories worth sharing.
-        </p>
-
-        <p className="text-lg leading-relaxed text-gray-700">
-          Whether it is conquering a challenging mountain trail, relaxing in a serene countryside
-          setting, or soaking in the excitement of a global motorsport event, every trip is crafted
-          with purpose and passion.
-        </p>
-
-        <p className="text-lg leading-relaxed text-gray-700">
-          We pride ourselves on delivering well-organized, affordable, and seamless adventures
-          without compromising on quality or safety. Our team pays close attention to detail - from
-          transport and guides to experiences and group dynamics - ensuring every journey runs
-          smoothly from start to finish.
-        </p>
-
-        <p className="text-lg leading-relaxed text-gray-700">
-          We focus on responsible tourism, respect for nature, and meaningful engagement with the
-          destinations we explore.
-        </p>
-      </section>
-
-      <section className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-3 text-xl font-semibold text-orange-600">Personalized Adventures</h3>
-          <p className="leading-relaxed text-gray-600">
-            What sets us apart is our personalized approach. No two trips are the same because no
-            two travelers are the same.
-          </p>
+      <section className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+        <div>
+          <p className="eyebrow mb-3">Who we are</p>
+          <h2 className="display-title">Adventure, but with better taste and tighter planning.</h2>
         </div>
-
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-3 text-xl font-semibold text-orange-600">Shared Experiences</h3>
-          <p className="leading-relaxed text-gray-600">
-            We create experiences that feel less like traditional tours and more like shared
-            adventures among friends.
+        <div className="premium-card space-y-6 p-7 text-lg leading-8 text-[#715f4e] md:p-10">
+          <p>
+            <strong className="text-[#21170f]">Sunrise Tours & Adventure</strong> is a modern
+            travel and adventure company built for explorers who crave more than ordinary trips.
+            We create well-curated outdoor experiences that bring people closer to nature,
+            adventure, and each other.
           </p>
-        </div>
-
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-3 text-xl font-semibold text-orange-600">A Sense of Belonging</h3>
-          <p className="leading-relaxed text-gray-600">
-            Our goal is to inspire confidence, excitement, and a true sense of belonging in every
-            traveler who joins us.
+          <p>
+            From scenic hikes and waterfall chases to lodge escapes, camping experiences, game
+            drive safaris, and major event trips such as the WRC Safari Rally, our journeys are
+            designed to feel bold, memorable, and well hosted.
           </p>
         </div>
       </section>
 
-      <section className="max-w-4xl space-y-6">
-        <p className="text-lg leading-relaxed text-gray-700">
-          At Sunrise Tours & Adventure, we do not just take you to destinations - we create
-          experiences that spark adventure, build connections, and leave lasting memories long after
-          the journey ends.
-        </p>
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {[
+          {
+            title: 'Personalized Adventures',
+            text: 'No two trips are treated the same. We tailor the route, mood, and logistics to the people joining.',
+          },
+          {
+            title: 'Shared Experiences',
+            text: 'Our trips feel social and warm without becoming disorganized or noisy.',
+          },
+          {
+            title: 'A Sense of Belonging',
+            text: 'We want every guest to feel expected, guided, and part of something memorable.',
+          },
+        ].map((item) => (
+          <div key={item.title} className="premium-card p-7">
+            <h3 className="font-display text-3xl font-semibold leading-none text-[#21170f]">
+              {item.title}
+            </h3>
+            <p className="mt-5 leading-7 text-[#715f4e]">{item.text}</p>
+          </div>
+        ))}
+      </section>
 
-        <p className="text-lg font-semibold text-orange-600">
-          Come explore with us. Your next adventure starts here.
-        </p>
+      <section className="overflow-hidden rounded-[2.5rem] bg-[#16372c] p-7 text-[#fffaf1] md:p-12">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1fr]">
+          <div>
+            <p className="eyebrow mb-4 text-[#d8a04a]">Our approach</p>
+            <h2 className="font-display text-4xl font-semibold leading-none tracking-[-0.04em] md:text-6xl">
+              We obsess over the details guests should never have to worry about.
+            </h2>
+          </div>
+          <div className="space-y-6 text-lg leading-8 text-[#f7ead4]/75">
+            <p>
+              We believe travel is about moments, energy, and connection. Our experiences are
+              designed for individuals, couples, friends, and groups who want to escape routine,
+              explore Kenya&apos;s diverse landscapes, and create stories worth sharing.
+            </p>
+            <p>
+              We pay close attention to transport, guides, venue quality, pacing, safety, and group
+              dynamics so every journey runs smoothly from start to finish.
+            </p>
+          </div>
+        </div>
       </section>
     </div>
   );

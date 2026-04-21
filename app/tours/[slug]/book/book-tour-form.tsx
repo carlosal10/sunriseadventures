@@ -125,61 +125,60 @@ export default function BookTourForm({ tour }: Props) {
   };
 
   return (
-    <div className="space-y-5 rounded-2xl border bg-white p-6 shadow-sm">
-      <input
-        type="text"
-        name="name"
-        placeholder="Full Name"
-        required
-        value={form.name}
-        onChange={handleChange}
-        className="w-full rounded-lg border px-4 py-3"
-      />
+    <div className="space-y-5">
+      <div className="grid gap-5 md:grid-cols-2">
+        <input
+          type="text"
+          name="name"
+          placeholder="Full Name"
+          required
+          value={form.name}
+          onChange={handleChange}
+          className="form-control"
+        />
 
-      <input
-        type="tel"
-        name="phone"
-        placeholder="Phone Number"
-        required
-        value={form.phone}
-        onChange={handleChange}
-        className="w-full rounded-lg border px-4 py-3"
-      />
+        <input
+          type="tel"
+          name="phone"
+          placeholder="Phone Number"
+          required
+          value={form.phone}
+          onChange={handleChange}
+          className="form-control"
+        />
+      </div>
 
-      <input
-        type="email"
-        name="email"
-        placeholder="Email Address"
-        value={form.email}
-        onChange={handleChange}
-        className="w-full rounded-lg border px-4 py-3"
-      />
+      <div className="grid gap-5 md:grid-cols-[1fr_12rem]">
+        <input
+          type="email"
+          name="email"
+          placeholder="Email Address"
+          value={form.email}
+          onChange={handleChange}
+          className="form-control"
+        />
 
-      <select
-        name="people"
-        value={form.people}
-        onChange={handleChange}
-        className="w-full rounded-lg border px-4 py-3"
-      >
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((count) => (
-          <option key={count} value={count}>
-            {count} Person{count > 1 ? 's' : ''}
-          </option>
-        ))}
-      </select>
+        <select name="people" value={form.people} onChange={handleChange} className="form-control">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((count) => (
+            <option key={count} value={count}>
+              {count} Person{count > 1 ? 's' : ''}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <textarea
         name="message"
         placeholder="Any special requests or questions?"
-        rows={4}
+        rows={5}
         value={form.message}
         onChange={handleChange}
-        className="w-full rounded-lg border px-4 py-3"
+        className="form-control"
       />
 
       {feedback && (
         <div
-          className={`rounded-lg px-4 py-3 text-sm ${
+          className={`rounded-2xl px-4 py-3 text-sm font-semibold ${
             feedback.kind === 'success'
               ? 'bg-green-50 text-green-700'
               : 'bg-red-50 text-red-700'
@@ -189,18 +188,20 @@ export default function BookTourForm({ tour }: Props) {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={loading}
-        className="w-full rounded-lg bg-orange-600 py-4 font-semibold text-white disabled:opacity-50"
-      >
-        {loading ? 'Submitting...' : 'Submit Booking'}
-      </button>
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={loading}
+          className="btn-primary w-full disabled:opacity-50 sm:w-auto"
+        >
+          {loading ? 'Submitting...' : 'Submit Booking'}
+        </button>
 
-      <Link href={`/tours/${tour.slug}`} className="block text-center text-sm text-gray-500">
-        &lt; Back to tour details
-      </Link>
+        <Link href={`/tours/${tour.slug}`} className="btn-secondary">
+          &lt; Back to tour details
+        </Link>
+      </div>
     </div>
   );
 }
