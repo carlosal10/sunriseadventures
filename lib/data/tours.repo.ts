@@ -123,6 +123,20 @@ function sortTours(tours: TourRecord[]) {
   );
 }
 
+function mergeTours(primaryTours: TourRecord[], fallbackTours: TourRecord[]) {
+  const merged = new Map<string, TourRecord>();
+
+  for (const tour of fallbackTours) {
+    merged.set(tour.slug, tour);
+  }
+
+  for (const tour of primaryTours) {
+    merged.set(tour.slug, tour);
+  }
+
+  return Array.from(merged.values());
+}
+
 function normalizeTour(rawValue: any): TourRecord {
   const raw = toPlainObject(rawValue);
   const gallerySource = asStringArray(raw.gallery).length
@@ -226,7 +240,10 @@ export async function listTours() {
     async () => mockTourModel.find({ isPublished: true })
   );
 
-  return sortTours((tours as any[]).map(normalizeTour).filter((tour) => tour.isPublished));
+  const normalizedTours = (tours as any[]).map(normalizeTour).filter((tour) => tour.isPublished);
+  const fallbackTours = listFallbackTours().filter((tour) => tour.isPublished);
+
+  return sortTours(mergeTours(normalizedTours, fallbackTours));
 }
 
 export async function listFeaturedTours(limit = 5) {
@@ -240,7 +257,12 @@ export async function getTour(slug: string) {
     async () => mockTourModel.findOne({ slug, isPublished: true })
   );
 
-  return tour ? normalizeTour(tour) : null;
+  if (tour) {
+    return normalizeTour(tour);
+  }
+
+  const tours = await listTours();
+  return tours.find((item) => item.slug === slug) ?? null;
 }
 
 export async function getTourAdmin(slug: string) {
