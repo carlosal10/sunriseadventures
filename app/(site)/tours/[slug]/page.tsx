@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getTour } from '../../../../lib/data/tours.repo';
 import TourDetailsView from './tour-details-view';
 
@@ -34,6 +34,10 @@ export default async function TourDetails({ params }: { params: { slug: string }
 
   if (!tour) {
     notFound();
+  }
+
+  if (tour.slug !== params.slug) {
+    redirect(`/tours/${tour.slug}`);
   }
 
   return <TourDetailsView tour={tour} />;

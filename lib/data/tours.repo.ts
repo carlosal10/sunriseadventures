@@ -17,6 +17,10 @@ type TourWriteInput = Partial<TourRecord> & {
   images?: string[];
 };
 
+type TourLookupOptions = {
+  includeDrafts?: boolean;
+};
+
 function hasDatabaseConnectionConfig() {
   return Boolean(process.env.MONGODB_URI);
 }
@@ -62,6 +66,18 @@ function asStringArray(value: unknown) {
   }
 
   return [];
+}
+
+function slugifyTourValue(value: unknown) {
+  const raw = asString(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
+    .toLowerCase();
+
+  return raw || '';
 }
 
 function normalizeAvailability(value: unknown, fallbackDate = ''): TourAvailability[] {
@@ -131,7 +147,7 @@ function normalizeTour(rawValue: any): TourRecord {
   const gallery = gallerySource.length ? gallerySource : [heroImage];
   const priceValue = asNumber(raw.priceValue ?? raw.price, 0);
   const dateLabel = asString(raw.dateLabel);
-  const slug = asString(raw.slug, asString(raw.id));
+  const slug = slugifyTourValue(raw.slug ?? raw.title ?? raw.id);
   const summary = asString(raw.summary, asString(raw.short, asString(raw.description)));
 
   return {
@@ -165,10 +181,11 @@ function toStoreInput(data: TourWriteInput) {
   const priceValue = asNumber(data.priceValue ?? data.price, 0);
   const dateLabel = asString(data.dateLabel);
   const heroImage = asString(data.heroImage, gallery[0] || DEFAULT_IMAGE);
+  const slug = slugifyTourValue(data.slug ?? data.title);
 
   return {
-    id: asString(data.id, asString(data.slug)),
-    slug: asString(data.slug),
+    id: asString(data.id, slug),
+    slug,
     title: asString(data.title, 'Untitled Tour'),
     short: asString(data.short),
     summary: asString(data.summary, asString(data.short, asString(data.description))),
@@ -193,6 +210,56 @@ function toStoreInput(data: TourWriteInput) {
     featuredOrder: asNumber(data.featuredOrder, 999),
     whatsappNumber: asString(data.whatsappNumber, DEFAULT_WHATSAPP_NUMBER),
   };
+}
+
+function matchesRequestedSlug(rawValue: any, requestedSlug: string) {
+  const raw = toPlainObject(rawValue);
+  const requested = slugifyTourValue(requestedSlug);
+  const candidates = [
+    asString(raw.slug),
+    asString(raw.title),
+    slugifyTourValue(raw.slug),
+    slugifyTourValue(raw.title),
+  ].filter(Boolean);
+
+  return candidates.includes(requestedSlug) || candidates.includes(requested);
+}
+
+async function findTourDocumentBySlug(slug: string, options: TourLookupOptions = {}) {
+  const { includeDrafts = false } = options;
+  const filter = includeDrafts ? {} : { isPublished: true };
+  const requestedSlug = asString(slug);
+  const canonicalSlug = slugifyTourValue(requestedSlug);
+
+  const exactDocument = await withTourStore(
+    async () => Tour.findOne({ slug: requestedSlug, ...filter }).lean(),
+    async () => mockTourModel.findOne({ slug: requestedSlug, ...filter }),
+    { fallbackOnDatabaseError: false }
+  );
+
+  if (exactDocument) {
+    return exactDocument;
+  }
+
+  if (canonicalSlug && canonicalSlug !== requestedSlug) {
+    const canonicalDocument = await withTourStore(
+      async () => Tour.findOne({ slug: canonicalSlug, ...filter }).lean(),
+      async () => mockTourModel.findOne({ slug: canonicalSlug, ...filter }),
+      { fallbackOnDatabaseError: false }
+    );
+
+    if (canonicalDocument) {
+      return canonicalDocument;
+    }
+  }
+
+  const candidates = await withTourStore(
+    async () => Tour.find(filter).lean(),
+    async () => mockTourModel.find(filter),
+    { fallbackOnDatabaseError: false }
+  );
+
+  return (candidates as any[]).find((item) => matchesRequestedSlug(item, requestedSlug)) ?? null;
 }
 
 async function withTourStore<T>(
@@ -235,21 +302,13 @@ export async function listFeaturedTours(limit = 5) {
 }
 
 export async function getTour(slug: string) {
-  const tour = await withTourStore(
-    async () => Tour.findOne({ slug, isPublished: true }).lean(),
-    async () => mockTourModel.findOne({ slug, isPublished: true }),
-    { fallbackOnDatabaseError: false }
-  );
+  const tour = await findTourDocumentBySlug(slug);
 
   return tour ? normalizeTour(tour) : null;
 }
 
 export async function getTourAdmin(slug: string) {
-  const tour = await withTourStore(
-    async () => Tour.findOne({ slug }).lean(),
-    async () => mockTourModel.findOne({ slug }),
-    { fallbackOnDatabaseError: false }
-  );
+  const tour = await findTourDocumentBySlug(slug, { includeDrafts: true });
 
   return tour ? normalizeTour(tour) : null;
 }
@@ -277,11 +336,19 @@ export async function createTour(data: TourWriteInput) {
 }
 
 export async function updateTourBySlug(slug: string, data: TourWriteInput) {
-  const payload = toStoreInput({ ...data, slug });
+  const existingTour = await findTourDocumentBySlug(slug, { includeDrafts: true });
+
+  if (!existingTour) {
+    return null;
+  }
+
+  const payload = toStoreInput({ ...data, slug: data.slug ?? existingTour.slug });
+  const rawExisting = toPlainObject(existingTour);
+  const documentFilter = rawExisting._id ? { _id: rawExisting._id } : { slug: rawExisting.slug };
 
   const tour = await withTourStore(
-    async () => Tour.findOneAndUpdate({ slug }, { $set: payload }, { new: true }).lean(),
-    async () => mockTourModel.findOneAndUpdate({ slug }, { $set: payload }),
+    async () => Tour.findOneAndUpdate(documentFilter, { $set: payload }, { new: true }).lean(),
+    async () => mockTourModel.findOneAndUpdate(documentFilter, { $set: payload }),
     { fallbackOnDatabaseError: false }
   );
 
@@ -289,9 +356,18 @@ export async function updateTourBySlug(slug: string, data: TourWriteInput) {
 }
 
 export async function deleteTourBySlug(slug: string) {
+  const existingTour = await findTourDocumentBySlug(slug, { includeDrafts: true });
+
+  if (!existingTour) {
+    return null;
+  }
+
+  const rawExisting = toPlainObject(existingTour);
+  const documentFilter = rawExisting._id ? { _id: rawExisting._id } : { slug: rawExisting.slug };
+
   const tour = await withTourStore(
-    async () => Tour.findOneAndDelete({ slug }).lean(),
-    async () => mockTourModel.findOneAndDelete({ slug }),
+    async () => Tour.findOneAndDelete(documentFilter).lean(),
+    async () => mockTourModel.findOneAndDelete(documentFilter),
     { fallbackOnDatabaseError: false }
   );
 

@@ -14,6 +14,8 @@ function clone<T>(value: T) {
 function matchesFilter(tour: MockTour, filter?: Record<string, unknown>) {
   if (!filter || Object.keys(filter).length === 0) return true;
 
+  if (typeof filter._id === 'string' && tour._id !== filter._id) return false;
+
   if (typeof filter.slug === 'string' && tour.slug !== filter.slug) return false;
 
   if (typeof filter.isPublished === 'boolean' && tour.isPublished !== filter.isPublished) {

@@ -243,6 +243,9 @@ export default function TourFormAction({ mode, initial }: Props) {
               className="form-control disabled:bg-[#f2dfbf]/50"
               placeholder="tigoni-experience"
             />
+            <span className="block text-xs text-[#715f4e]">
+              Clean URL slugs are normalized automatically when you save.
+            </span>
           </label>
 
           <label className="space-y-2">

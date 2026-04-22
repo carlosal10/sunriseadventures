@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getTour } from '../../../../../lib/data/tours.repo';
 import BookTourForm from './book-tour-form';
 
@@ -38,6 +38,10 @@ export default async function BookTourPage({ params }: { params: { slug: string 
 
   if (!tour) {
     notFound();
+  }
+
+  if (tour.slug !== params.slug) {
+    redirect(`/tours/${tour.slug}/book`);
   }
 
   return (
