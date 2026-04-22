@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTour } from '../../../../../lib/data/tours.repo';
 import BookTourForm from './book-tour-form';
@@ -6,7 +7,34 @@ import BookTourForm from './book-tour-form';
 export const dynamic = 'force-dynamic';
 
 export default async function BookTourPage({ params }: { params: { slug: string } }) {
-  const tour = await getTour(params.slug);
+  let tour = null;
+
+  try {
+    tour = await getTour(params.slug);
+  } catch (error) {
+    console.error('Failed to load booking page:', error);
+
+    return (
+      <section className="premium-card border-red-200 bg-red-50 p-8 text-red-800 md:p-10">
+        <p className="eyebrow mb-4 text-red-700">Booking unavailable</p>
+        <h1 className="font-display text-4xl font-semibold leading-none tracking-[-0.04em]">
+          We could not load this booking page right now.
+        </h1>
+        <p className="mt-5 max-w-2xl leading-7">
+          The live tour database is temporarily unavailable. Please try again shortly or contact
+          the team directly so we can help.
+        </p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link href="/contact" className="btn-primary">
+            Contact the Team
+          </Link>
+          <Link href="/tours" className="btn-secondary">
+            Back to Tours
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   if (!tour) {
     notFound();

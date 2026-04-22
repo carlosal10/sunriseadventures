@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import HomeHeroSlideshow from '../components/HomeHeroSlideshow';
 import { listFeaturedTours } from '../../lib/data/tours.repo';
+import ToursEmptyState from './tours/tours-empty-state';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,15 @@ const promises = [
 ];
 
 export default async function Home() {
-  const featuredTours = await listFeaturedTours(6);
+  let featuredTours = [];
+  let toursUnavailable = false;
+
+  try {
+    featuredTours = await listFeaturedTours(6);
+  } catch (error) {
+    toursUnavailable = true;
+    console.error('Failed to load featured tours:', error);
+  }
 
   return (
     <div className="space-y-24">
@@ -46,46 +55,61 @@ export default async function Home() {
         </p>
       </section>
 
-      <section className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-        {featuredTours.map((tour, index) => (
-          <article
-            key={tour.slug}
-            className={`premium-card group overflow-hidden ${
-              index === 0 ? 'lg:col-span-2 lg:grid lg:grid-cols-[1.05fr_0.95fr]' : ''
-            }`}
-          >
-            <div className={`${index === 0 ? 'h-80 lg:h-full' : 'h-64'} relative overflow-hidden`}>
-              <Image
-                src={tour.heroImage}
-                alt={tour.title}
-                fill
-                className="object-cover transition duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
-              <span className="absolute left-5 top-5 rounded-full bg-[#fffaf1]/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#16372c]">
-                {tour.dateLabel}
-              </span>
-            </div>
-
-            <div className="flex min-h-72 flex-col justify-between p-6 md:p-8">
-              <div>
-                <p className="eyebrow mb-3">{tour.location}</p>
-                <h3 className="font-display text-3xl font-semibold leading-none tracking-[-0.035em] text-[#21170f]">
-                  {tour.title}
-                </h3>
-                <p className="mt-4 leading-7 text-[#715f4e]">{tour.summary}</p>
+      {featuredTours.length > 0 ? (
+        <section className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          {featuredTours.map((tour, index) => (
+            <article
+              key={tour.slug}
+              className={`premium-card group overflow-hidden ${
+                index === 0 ? 'lg:col-span-2 lg:grid lg:grid-cols-[1.05fr_0.95fr]' : ''
+              }`}
+            >
+              <div
+                className={`${index === 0 ? 'h-80 lg:h-full' : 'h-64'} relative overflow-hidden`}
+              >
+                <Image
+                  src={tour.heroImage}
+                  alt={tour.title}
+                  fill
+                  className="object-cover transition duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+                <span className="absolute left-5 top-5 rounded-full bg-[#fffaf1]/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#16372c]">
+                  {tour.dateLabel}
+                </span>
               </div>
 
-              <div className="mt-8 flex items-center justify-between gap-4 border-t border-[#21170f]/10 pt-5">
-                <span className="font-bold text-[#b86232]">{tour.priceLabel}</span>
-                <Link href={`/tours/${tour.slug}`} className="btn-secondary px-5 py-2">
-                  View Trip
-                </Link>
+              <div className="flex min-h-72 flex-col justify-between p-6 md:p-8">
+                <div>
+                  <p className="eyebrow mb-3">{tour.location}</p>
+                  <h3 className="font-display text-3xl font-semibold leading-none tracking-[-0.035em] text-[#21170f]">
+                    {tour.title}
+                  </h3>
+                  <p className="mt-4 leading-7 text-[#715f4e]">{tour.summary}</p>
+                </div>
+
+                <div className="mt-8 flex items-center justify-between gap-4 border-t border-[#21170f]/10 pt-5">
+                  <span className="font-bold text-[#b86232]">{tour.priceLabel}</span>
+                  <Link href={`/tours/${tour.slug}`} className="btn-secondary px-5 py-2">
+                    View Trip
+                  </Link>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
-      </section>
+            </article>
+          ))}
+        </section>
+      ) : (
+        <ToursEmptyState
+          title={toursUnavailable ? 'Tours are temporarily unavailable.' : 'No featured tours are live yet.'}
+          message={
+            toursUnavailable
+              ? 'We could not load the live tour database right now. Please try again shortly or contact the team directly.'
+              : 'The admin team has not featured any tours yet. New trips will appear here as soon as they are published.'
+          }
+          actionHref="/contact"
+          actionLabel="Contact the Team"
+        />
+      )}
 
       <section className="grid gap-8 rounded-[2.5rem] bg-[#16372c] p-6 text-[#fffaf1] shadow-[0_28px_90px_rgba(22,55,44,0.25)] md:p-10 lg:grid-cols-[0.8fr_1.2fr]">
         <div className="flex flex-col justify-between">

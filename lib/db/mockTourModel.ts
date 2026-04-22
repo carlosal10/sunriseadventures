@@ -1,15 +1,11 @@
-import { listAllTours, type TourRecord } from '../domain/tours';
+import type { TourRecord } from '../domain/tours';
 
 type MockTour = TourRecord & {
   _id?: string;
   published?: boolean;
 };
 
-const seed: MockTour[] = listAllTours().map((tour, index) => ({
-  _id: String(index + 1),
-  published: tour.isPublished,
-  ...tour,
-}));
+const seed: MockTour[] = [];
 
 function clone<T>(value: T) {
   return JSON.parse(JSON.stringify(value)) as T;
@@ -32,6 +28,10 @@ function matchesFilter(tour: MockTour, filter?: Record<string, unknown>) {
 }
 
 export const mockTourModel = {
+  reset() {
+    seed.length = 0;
+  },
+
   async find(filter?: Record<string, unknown>) {
     return clone(seed.filter((tour) => matchesFilter(tour, filter)));
   },

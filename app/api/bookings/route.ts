@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createBooking, listBookings } from '../../../lib/data/bookings.repo';
 import { getTour } from '../../../lib/data/tours.repo';
+import { getDatabaseErrorMessage } from '../../../lib/db/error-message';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const KENYAN_PHONE_PATTERN = /^(?:2547\d{8}|07\d{8})$/;
@@ -48,7 +49,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Please provide a valid email address.' }, { status: 400 });
   }
 
-  const tour = await getTour(tourSlug);
+  let tour;
+
+  try {
+    tour = await getTour(tourSlug);
+  } catch (error) {
+    console.error('Failed to load booking tour:', error);
+    return NextResponse.json({ error: getDatabaseErrorMessage(error) }, { status: 503 });
+  }
+
   if (!tour) {
     return NextResponse.json({ error: 'Selected tour could not be found.' }, { status: 404 });
   }

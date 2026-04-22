@@ -2,7 +2,6 @@ import { connectDB } from '../db/mongoose';
 import Tour from '../db/models/Tour';
 import { mockTourModel } from '../db/mockTourModel';
 import {
-  listAllTours as listFallbackTours,
   type TourAvailability,
   type TourRecord,
   type TourTestimonial,
@@ -123,20 +122,6 @@ function sortTours(tours: TourRecord[]) {
   );
 }
 
-function mergeTours(primaryTours: TourRecord[], fallbackTours: TourRecord[]) {
-  const merged = new Map<string, TourRecord>();
-
-  for (const tour of fallbackTours) {
-    merged.set(tour.slug, tour);
-  }
-
-  for (const tour of primaryTours) {
-    merged.set(tour.slug, tour);
-  }
-
-  return Array.from(merged.values());
-}
-
 function normalizeTour(rawValue: any): TourRecord {
   const raw = toPlainObject(rawValue);
   const gallerySource = asStringArray(raw.gallery).length
@@ -237,13 +222,11 @@ async function withTourStore<T>(
 export async function listTours() {
   const tours = await withTourStore(
     async () => Tour.find({ isPublished: true }).sort({ featuredOrder: 1, title: 1 }).lean(),
-    async () => mockTourModel.find({ isPublished: true })
+    async () => mockTourModel.find({ isPublished: true }),
+    { fallbackOnDatabaseError: false }
   );
 
-  const normalizedTours = (tours as any[]).map(normalizeTour).filter((tour) => tour.isPublished);
-  const fallbackTours = listFallbackTours().filter((tour) => tour.isPublished);
-
-  return sortTours(mergeTours(normalizedTours, fallbackTours));
+  return sortTours((tours as any[]).map(normalizeTour).filter((tour) => tour.isPublished));
 }
 
 export async function listFeaturedTours(limit = 5) {
@@ -254,15 +237,11 @@ export async function listFeaturedTours(limit = 5) {
 export async function getTour(slug: string) {
   const tour = await withTourStore(
     async () => Tour.findOne({ slug, isPublished: true }).lean(),
-    async () => mockTourModel.findOne({ slug, isPublished: true })
+    async () => mockTourModel.findOne({ slug, isPublished: true }),
+    { fallbackOnDatabaseError: false }
   );
 
-  if (tour) {
-    return normalizeTour(tour);
-  }
-
-  const tours = await listTours();
-  return tours.find((item) => item.slug === slug) ?? null;
+  return tour ? normalizeTour(tour) : null;
 }
 
 export async function getTourAdmin(slug: string) {
@@ -317,8 +296,4 @@ export async function deleteTourBySlug(slug: string) {
   );
 
   return tour ? normalizeTour(tour) : null;
-}
-
-export function fallbackToursForSeed() {
-  return listFallbackTours();
 }

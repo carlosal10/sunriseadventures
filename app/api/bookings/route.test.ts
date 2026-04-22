@@ -1,9 +1,12 @@
 import { GET, POST } from './route';
+import { createTour } from '../../../lib/data/tours.repo';
+import { mockTourModel } from '../../../lib/db/mockTourModel';
 
 const originalMongoUri = process.env.MONGODB_URI;
 
 beforeEach(() => {
   delete process.env.MONGODB_URI;
+  mockTourModel.reset();
 });
 
 afterAll(() => {
@@ -12,6 +15,32 @@ afterAll(() => {
   } else {
     delete process.env.MONGODB_URI;
   }
+});
+
+beforeEach(async () => {
+  await createTour({
+    slug: 'tigoni-experience',
+    title: 'Tigoni Experience',
+    short: 'A countryside reset with farm views, walks, and easy adventure.',
+    summary: 'Escape the city for a one-day countryside experience.',
+    description: 'Escape the city and immerse yourself in a refreshing countryside experience.',
+    heroImage: '/images/tigoni/1.jpg',
+    gallery: ['/images/tigoni/1.jpg'],
+    dateLabel: '24 Jan 2026',
+    location: 'Tigoni, Limuru',
+    priceValue: 2800,
+    priceLabel: 'From KES 2,800',
+    mapEmbed: 'https://www.google.com/maps?q=Tigoni%20Limuru&output=embed',
+    highlights: ['Guided farm tour'],
+    includes: ['Return transport'],
+    excludes: ['Personal expenses'],
+    availability: [{ date: '24 Jan 2026', status: 'Available' }],
+    testimonials: [],
+    isFeatured: true,
+    isPublished: true,
+    featuredOrder: 1,
+    whatsappNumber: '254118706567',
+  });
 });
 
 test('POST creates a booking for a known tour', async () => {

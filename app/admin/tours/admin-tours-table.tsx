@@ -45,15 +45,9 @@ export default function AdminToursTable({ tours }: Props) {
             </div>
 
             <div className="flex flex-wrap gap-3 lg:justify-end">
-              {tour.isPublished ? (
-                <Link href={`/tours/${tour.slug}`} className="btn-secondary px-4 py-2">
-                  Preview
-                </Link>
-              ) : (
-                <span className="btn-secondary cursor-not-allowed px-4 py-2 opacity-60">
-                  Publish To Preview
-                </span>
-              )}
+              <Link href={`/admin/tours/${tour.slug}/preview`} className="btn-secondary px-4 py-2">
+                Preview
+              </Link>
               <Link href={`/admin/tours/${tour.slug}`} className="btn-primary px-4 py-2">
                 Edit
               </Link>

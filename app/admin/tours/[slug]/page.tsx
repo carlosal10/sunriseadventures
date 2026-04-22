@@ -51,9 +51,16 @@ export default async function AdminTourPage({ params }: { params: { slug: string
             </p>
           </div>
 
-          <Link href={`/tours/${tour.slug}`} className="btn-primary w-full md:w-auto">
-            Preview Live Page
-          </Link>
+          <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
+            <Link href={`/admin/tours/${tour.slug}/preview`} className="btn-primary w-full md:w-auto">
+              Preview Tour
+            </Link>
+            {tour.isPublished && (
+              <Link href={`/tours/${tour.slug}`} className="btn-secondary w-full md:w-auto">
+                Open Live Page
+              </Link>
+            )}
+          </div>
         </div>
       </section>
 
