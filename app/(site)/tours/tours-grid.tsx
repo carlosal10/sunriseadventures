@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { TourRecord } from '../../../lib/domain/tours';
+import { getOptimizedImageUrl } from '../../../lib/images/cloudinary';
 import ToursEmptyState from './tours-empty-state';
 
 type Props = {
@@ -28,7 +29,7 @@ export default function ToursGrid({ tours }: Props) {
               <article className="premium-card h-full overflow-hidden">
                 <div className="relative h-72 overflow-hidden">
                   <Image
-                    src={tour.heroImage}
+                    src={getOptimizedImageUrl(tour.heroImage)}
                     alt={tour.title}
                     fill
                     className="object-cover transition duration-700 group-hover:scale-105"

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { getOptimizedImageUrl } from '../../../../lib/images/cloudinary';
 
 type Props = {
   images: string[];
@@ -22,7 +23,7 @@ export default function TourGallery({ images, title }: Props) {
         >
           <div className="relative h-full max-h-[82vh] w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/15">
             <Image
-              src={lightbox}
+              src={getOptimizedImageUrl(lightbox)}
               alt={`${title} gallery preview`}
               fill
               className="object-contain"
@@ -42,7 +43,7 @@ export default function TourGallery({ images, title }: Props) {
             }`}
           >
             <Image
-              src={image}
+              src={getOptimizedImageUrl(image)}
               alt={`${title} photo ${index + 1}`}
               fill
               className="object-cover transition duration-700 group-hover:scale-105"

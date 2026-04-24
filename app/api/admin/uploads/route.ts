@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
 import { NextResponse } from 'next/server';
+import { isCloudinaryConfigured, uploadToCloudinary } from '../../../../lib/uploads/cloudinary';
 import {
   ACCEPTED_IMAGE_TYPES,
   createSafeFileName,
@@ -38,6 +39,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Images must be 8 MB or smaller.' }, { status: 400 });
   }
 
+  if (isCloudinaryConfigured()) {
+    try {
+      const upload = await uploadToCloudinary(file);
+
+      return NextResponse.json(upload);
+    } catch (error) {
+      console.error('Cloudinary upload failed.', error);
+      return NextResponse.json(
+        { message: error instanceof Error ? error.message : 'Cloud image upload failed.' },
+        { status: 500 }
+      );
+    }
+  }
+
   const fileName = createSafeFileName(file.name, file.type);
 
   if (!fileName) {
@@ -55,6 +70,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     fileName,
+    provider: 'local',
     size: file.size,
     type: file.type,
     url,

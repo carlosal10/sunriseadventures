@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getTour } from '../../../../../lib/data/tours.repo';
+import { getOptimizedImageUrl } from '../../../../../lib/images/cloudinary';
 import BookTourForm from './book-tour-form';
 
 export const dynamic = 'force-dynamic';
@@ -48,7 +49,13 @@ export default async function BookTourPage({ params }: { params: { slug: string 
     <div className="grid gap-8 py-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
       <aside className="premium-card overflow-hidden">
         <div className="relative h-80">
-          <Image src={tour.heroImage} alt={tour.title} fill className="object-cover" priority />
+          <Image
+            src={getOptimizedImageUrl(tour.heroImage)}
+            alt={tour.title}
+            fill
+            className="object-cover"
+            priority
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-[#160f0a]/70 to-transparent" />
           <div className="absolute bottom-6 left-6 right-6 text-[#fffaf1]">
             <p className="eyebrow mb-3 text-[#f0bd6b]">Booking request</p>

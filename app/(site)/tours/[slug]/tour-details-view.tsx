@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { TourRecord } from '../../../../lib/domain/tours';
+import { getOptimizedImageUrl } from '../../../../lib/images/cloudinary';
 import TourGallery from './tour-gallery';
 
 type Props = {
@@ -12,7 +13,13 @@ export default function TourDetailsView({ tour, previewLabel }: Props) {
   return (
     <div className="space-y-16">
       <section className="relative h-[74vh] min-h-[620px] overflow-hidden rounded-[2.5rem] border border-white/60 shadow-[0_30px_90px_rgba(63,41,22,0.18)]">
-        <Image src={tour.heroImage} alt={tour.title} fill className="object-cover" priority />
+        <Image
+          src={getOptimizedImageUrl(tour.heroImage)}
+          alt={tour.title}
+          fill
+          className="object-cover"
+          priority
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-[#160f0a]/88 via-[#160f0a]/45 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#160f0a]/70 to-transparent" />
 

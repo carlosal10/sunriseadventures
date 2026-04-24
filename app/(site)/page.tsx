@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import HomeHeroSlideshow from '../components/HomeHeroSlideshow';
 import { listFeaturedTours } from '../../lib/data/tours.repo';
+import { getOptimizedImageUrl } from '../../lib/images/cloudinary';
 import ToursEmptyState from './tours/tours-empty-state';
 
 export const dynamic = 'force-dynamic';
@@ -68,7 +69,7 @@ export default async function Home() {
                 className={`${index === 0 ? 'h-80 lg:h-full' : 'h-64'} relative overflow-hidden`}
               >
                 <Image
-                  src={tour.heroImage}
+                  src={getOptimizedImageUrl(tour.heroImage)}
                   alt={tour.title}
                   fill
                   className="object-cover transition duration-700 group-hover:scale-105"
